@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics — 外贸 / 跨境电商求职看板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f0f2f5; color: #2c3e50;
+}
+
+header {
+  background: #1a3a5c; color: white; padding: 22px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 10px;
+}
+header h1 { font-size: 20px; font-weight: 600; }
+header p  { font-size: 12px; opacity: 0.65; margin-top: 4px; }
+.nav-link {
+  color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 500;
+  text-decoration: none; border: 1px solid rgba(255,255,255,0.4);
+  padding: 6px 14px; border-radius: 6px;
+}
+.nav-link:hover { background: rgba(255,255,255,0.15); }
+
+/* ── Stat cards ──────────────────────────────────────────────── */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 20px 32px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+.stat-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.stat-card .stat-value {
+  font-size: 28px; font-weight: 700; color: #1a3a5c; line-height: 1.1;
+}
+.stat-card .stat-label {
+  font-size: 12px; color: #64748b; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stat-card .stat-trend {
+  font-size: 11px; margin-top: 4px; font-weight: 600;
+}
+.stat-trend.up   { color: #16a34a; }
+.stat-trend.down { color: #dc2626; }
+.stat-trend.flat { color: #94a3b8; }
+
+/* ── Range selector strip ────────────────────────────────────── */
+.range-strip {
+  background: #f8fafc;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.range-strip label {
+  font-size: 12px; font-weight: 600; color: #475569; white-space: nowrap;
+}
+.range-strip select {
+  font-size: 12px; padding: 5px 10px; border-radius: 6px;
+  border: 1px solid #cbd5e1; background: white; color: #334155;
+  cursor: pointer;
+}
+.range-strip select:focus { outline: 2px solid #2e86ab; outline-offset: 1px; }
+.range-quick {
+  display: flex; gap: 6px; margin-left: 8px; flex-wrap: wrap;
+}
+.range-btn {
+  font-size: 12px; font-weight: 500; padding: 5px 12px;
+  border-radius: 6px; border: 1px solid #cbd5e1;
+  background: white; color: #475569; cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.range-btn:hover { background: #e2e8f0; }
+.range-btn.active {
+  background: #1a3a5c; color: white; border-color: #1a3a5c;
+}
+
+/* ── Granularity toggle (Daily / Weekly) ─────────────────────── */
+.gran-toggle {
+  background: #f0f2f5; border-bottom: 1px solid #e0e0e0;
+  padding: 10px 32px; display: flex; gap: 8px; align-items: center;
+  flex-wrap: wrap;
+}
+.gran-btn {
+  font-size: 12px; font-weight: 600; padding: 5px 16px;
+  border-radius: 6px; border: 1px solid #cbd5e1;
+  background: white; color: #475569; cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.gran-btn:hover { background: #e2e8f0; }
+.gran-btn.active {
+  background: #1a3a5c; color: white; border-color: #1a3a5c;
+}
+.gran-label {
+  font-size: 12px; font-weight: 600; color: #475569; margin-right: 4px;
+}
+
+/* ── View toggle ─────────────────────────────────────────────── */
+.view-toggle {
+  background: white; border-bottom: 1px solid #e0e0e0;
+  padding: 12px 32px; display: flex; gap: 14px; align-items: center;
+  font-size: 13px; flex-wrap: wrap;
+}
+.view-toggle label {
+  display: inline-flex; align-items: center; gap: 8px;
+  cursor: pointer; user-select: none; font-weight: 500; color: #444;
+}
+
+/* ── Layout ──────────────────────────────────────────────────── */
+.section {
+  padding: 24px 32px;
+}
+.section-title {
+  font-size: 15px; font-weight: 600; color: #1a3a5c;
+  margin-bottom: 16px; border-left: 3px solid #2e86ab;
+  padding-left: 10px;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+  gap: 20px;
+}
+
+.chart-card {
+  background: white; border-radius: 10px; padding: 20px 22px;
+  border: 1px solid #e8e8e8;
+}
+.chart-card h3 {
+  font-size: 13px; font-weight: 600; color: #555;
+  margin-bottom: 14px;
+}
+.chart-wrap {
+  position: relative; height: 260px;
+}
+.chart-wide { grid-column: 1 / -1; }
+.chart-wide .chart-wrap { height: 280px; }
+
+/* ── Tables ──────────────────────────────────────────────────── */
+table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+th {
+  background: #f8f9fa; text-align: left; padding: 8px 12px;
+  font-weight: 600; color: #555; border-bottom: 2px solid #e8e8e8;
+}
+th.sortable {
+  cursor: pointer; user-select: none; white-space: nowrap;
+}
+th.sortable:hover { background: #eef0f2; color: #1a3a5c; }
+th.sort-asc::after  { content: ' ▲'; font-size: 10px; opacity: 0.7; }
+th.sort-desc::after { content: ' ▼'; font-size: 10px; opacity: 0.7; }
+td {
+  padding: 8px 12px; border-bottom: 1px solid #f0f0f0; color: #333;
+}
+tr:hover td { background: #fafafa; }
+
+.bar-cell { display: flex; align-items: center; gap: 8px; }
+.mini-bar {
+  height: 8px; background: #e8e8e8; border-radius: 4px;
+  flex: 1; min-width: 60px; max-width: 160px; overflow: hidden;
+}
+.mini-bar-fill {
+  height: 100%; background: #1a3a5c; border-radius: 4px;
+}
+
+.trend-badge {
+  display: inline-block; padding: 3px 9px; border-radius: 10px;
+  font-size: 11px; font-weight: 600;
+}
+.trend-up   { background: #d4edda; color: #155724; }
+.trend-down { background: #f8d7da; color: #721c24; }
+.trend-flat { background: #e2e3e5; color: #495057; }
+
+.no-data {
+  text-align: center; padding: 80px 0; color: #aaa; font-size: 15px;
+}
+
+footer {
+  text-align: center; padding: 24px; font-size: 11px; color: #bbb;
+}
+
+@media (max-width: 700px) {
+  .charts-grid { grid-template-columns: 1fr; }
+  .stat-cards  { grid-template-columns: repeat(2, 1fr); padding: 14px 16px; }
+  .section     { padding: 16px; }
+  header, .range-strip, .gran-toggle, .view-toggle { padding-left: 16px; padding-right: 16px; }
+  .range-quick { margin-left: 0; }
+}
+@media (max-width: 480px) {
+  .stat-cards { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Analytics — 外贸 / 跨境电商求职看板</h1>
+    <p>Updated: 07 September 2026 at 13:23 UTC &nbsp;|&nbsp; Data from jobs.db — all scrape runs accumulated</p>
+  </div>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <a class="nav-link" href="index.html">Live Job Board</a>
+    <a class="nav-link" href="settings.html">&#9881; Settings</a>
+  </div>
+</header>
+
+<!-- Stat cards — populated by JS -->
+<div class="stat-cards" id="statCards">
+  <div class="stat-card" style="grid-column:1/-1;">
+    <div class="stat-label">Status</div>
+    <div class="stat-value" style="font-size:16px;color:#aaa;">No data yet — run job_searcher.py --site to populate.</div>
+  </div>
+</div>
+
+<!-- Granularity toggle: Daily / Weekly -->
+<div class="gran-toggle" id="granToggle" style="display:none;">
+  <span class="gran-label">View:</span>
+  <button class="gran-btn active" id="btnWeekly" onclick="setGranularity('week', this)">Weekly</button>
+  <button class="gran-btn"        id="btnDaily"  onclick="setGranularity('day',  this)">Daily</button>
+</div>
+
+<!-- Range selector strip -->
+<div class="range-strip" id="rangeStrip" style="display:none;">
+  <label for="fromPeriod" id="fromPeriodLabel">From week</label>
+  <select id="fromPeriod" onchange="onRangeDropdown()"></select>
+  <label for="toPeriod" id="toPeriodLabel">To week</label>
+  <select id="toPeriod" onchange="onRangeDropdown()"></select>
+  <div class="range-quick" id="rangeQuickBtns">
+    <button class="range-btn" onclick="setQuickRange(4,  this)">Last 4</button>
+    <button class="range-btn" onclick="setQuickRange(8,  this)">Last 8</button>
+    <button class="range-btn" onclick="setQuickRange(12, this)">Last 12</button>
+    <button class="range-btn" onclick="setQuickRange(30, this)">Last 30</button>
+    <button class="range-btn" onclick="setQuickRange(0,  this)">All time</button>
+  </div>
+</div>
+
+<div class="view-toggle">
+  <span style="display:inline-flex; align-items:center; gap:8px;">
+    <label for="minScoreFilter" style="font-weight:500; color:#444; white-space:nowrap;">Min score:</label>
+    <input type="number" id="minScoreFilter" min="0" step="1" placeholder="any"
+           oninput="onScoreFilter()"
+           style="width:72px; padding:5px 8px; border:1px solid #ccc; border-radius:6px;
+                  font-size:13px; outline:none;">
+  </span>
+  <span style="display:inline-flex; align-items:center; gap:8px; margin-left:16px;">
+    <label style="font-weight:500; color:#444; white-space:nowrap;">New jobs score &ge;:</label>
+    <input type="number" id="newJobScoreFilter" min="0" step="1" placeholder="any"
+           oninput="onNewJobScoreFilter()"
+           style="width:72px; padding:5px 8px; border:1px solid #ccc; border-radius:6px; font-size:13px;">
+  </span>
+</div>
+
+<div class="section">
+  <div class="section-title">Market Volume Over Time</div>
+  <div class="charts-grid">
+
+    <div class="chart-card chart-wide">
+      <h3 id="titleChartWeekly">Jobs found per period (matched vs rejected)</h3>
+      <div class="chart-wrap">
+        <canvas id="chartWeekly"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card chart-wide">
+      <h3 id="titleChartNewJobs">New jobs discovered per period (first appearance)</h3>
+      <div class="chart-wrap">
+        <canvas id="chartNewJobs"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3 id="titleChartSource">Source: LinkedIn vs Indeed per period</h3>
+      <div class="chart-wrap">
+        <canvas id="chartSource"></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Quality &amp; Trend Signals</div>
+  <div class="charts-grid">
+
+    <div class="chart-card">
+      <h3 id="titleChartTrend">Rolling 4-period average (matched jobs) — is the market improving?</h3>
+      <div class="chart-wrap">
+        <canvas id="chartTrend"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3 id="titleChartFit">Average fit score per period</h3>
+      <div class="chart-wrap">
+        <canvas id="chartFit"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3 id="titleChartTarget">Target company appearances per period</h3>
+      <div class="chart-wrap">
+        <canvas id="chartTarget"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card" id="chartDesiredCard" style="display:none;">
+      <h3 id="titleChartDesired">Desired matches per period (score &ge; desired threshold)</h3>
+      <div class="chart-wrap">
+        <canvas id="chartDesired"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3 id="titleChartRatio">Match rate: accepted / (accepted + rejected) per period</h3>
+      <div class="chart-wrap">
+        <canvas id="chartRatio"></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Top Companies in Results</div>
+  <div class="charts-grid" style="margin-bottom:16px;">
+    <div class="chart-card chart-wide">
+      <h3>Top 10 companies by appearance count</h3>
+      <div class="chart-wrap" style="height:320px;">
+        <canvas id="chartCompanies"></canvas>
+      </div>
+    </div>
+  </div>
+  <div style="background:white; border-radius:10px; border:1px solid #e8e8e8; overflow:hidden;">
+    <table id="companyTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Company</th>
+          <th>Appearances</th>
+          <th>Share</th>
+        </tr>
+      </thead>
+      <tbody id="companyTbody">
+        <tr><td colspan="4" class="no-data">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title" id="titleBreakdownTable">Weekly Breakdown Table</div>
+  <div style="background:white; border-radius:10px; border:1px solid #e8e8e8; overflow:hidden; overflow-x:auto;">
+    <table id="weekTable">
+      <thead>
+        <tr>
+          <th class="sortable" data-col="0" data-dir="desc" onclick="sortWeekTable(this)" id="thPeriodCol">Week</th>
+          <th class="sortable" data-col="1" data-dir="desc" onclick="sortWeekTable(this)">Matched</th>
+          <th class="sortable" data-col="2" data-dir="desc" onclick="sortWeekTable(this)">Rejected</th>
+          <th class="sortable" data-col="3" data-dir="desc" onclick="sortWeekTable(this)">Match Rate</th>
+          <th class="sortable" data-col="4" data-dir="desc" onclick="sortWeekTable(this)">Avg Fit</th>
+          <th class="sortable" data-col="5" data-dir="desc" onclick="sortWeekTable(this)">Target Co.</th>
+          <th>Trend</th>
+        </tr>
+      </thead>
+      <tbody id="weekTbody">
+        <tr><td colspan="7" class="no-data">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  Auto-generated by job_searcher.py &nbsp;&middot;&nbsp;
+  Charts: Chart.js (CDN) &nbsp;&middot;&nbsp;
+  Data: accumulated SQLite runs
+</footer>
+
+<script>
+// ── Embedded analytics payload ────────────────────────────────────
+// DATA shape: { week_labels, day_labels, all_weekly, all_daily, all, desired_score }
+const DATA = {"week_labels": ["2026-W37"], "day_labels": ["2026-09-07"], "all_weekly": {"jobs_per_week": [25], "rejected_per_week": [82], "rolling_avg": [25.0], "avg_fit_per_week": [27.12], "target_per_week": [0], "desired_per_week": [5], "cat_per_week": {"GNC/Aerospace": [0], "High-Tech/Precision": [0], "Robotics": [6], "General Control": [19], "Blacklisted-PLC": [0], "Blacklisted-Other": [0], "Rejected-Senior": [53], "Rejected-No-Gate": [29]}, "src_per_week": {"linkedin": [24], "indeed": [1], "other": [0]}, "top_companies": [{"company": "百草味", "count": 2}, {"company": "Amazon", "count": 2}, {"company": "Tederic Machinery", "count": 1}, {"company": "浙江泰普森控股集团有限公司", "count": 1}, {"company": "VBill Payment", "count": 1}, {"company": "SF Express Corporation - USA", "count": 1}, {"company": "北京英博电气股份有限公司", "count": 1}, {"company": "上海凯莱英生物技术有限公司", "count": 1}, {"company": "Brother Enterprises Holding Co., Ltd.", "count": 1}, {"company": "EKY", "count": 1}, {"company": "泰尔茂", "count": 1}, {"company": "新安传媒有限公司", "count": 1}, {"company": "DHL Global Forwarding", "count": 1}, {"company": "友邦科技", "count": 1}, {"company": "Eoptolink Technology Inc., Ltd.", "count": 1}, {"company": "Lazada", "count": 1}, {"company": "Beingmate", "count": 1}, {"company": "Haleon", "count": 1}, {"company": "Sourceo", "count": 1}, {"company": "MEDx", "count": 1}], "ratio_per_week": [{"week": "2026-W37", "accepted": 25, "rejected": 82, "total": 107, "accept_pct": 23.4}], "summary": {"total_seen": 107, "total_accepted": 25, "total_rejected": 82, "avg_fit": 27.12, "total_desired": 5, "total_runs": 1, "last_run": "2026-09-07"}, "new_jobs_per_week": [25]}, "all_daily": {"jobs_per_week": [25], "rejected_per_week": [82], "rolling_avg": [25.0], "avg_fit_per_week": [27.12], "target_per_week": [0], "desired_per_week": [5], "cat_per_week": {"GNC/Aerospace": [0], "High-Tech/Precision": [0], "Robotics": [6], "General Control": [19], "Blacklisted-PLC": [0], "Blacklisted-Other": [0], "Rejected-Senior": [53], "Rejected-No-Gate": [29]}, "src_per_week": {"linkedin": [24], "indeed": [1], "other": [0]}, "top_companies": [{"company": "百草味", "count": 2}, {"company": "Amazon", "count": 2}, {"company": "Tederic Machinery", "count": 1}, {"company": "浙江泰普森控股集团有限公司", "count": 1}, {"company": "VBill Payment", "count": 1}, {"company": "SF Express Corporation - USA", "count": 1}, {"company": "北京英博电气股份有限公司", "count": 1}, {"company": "上海凯莱英生物技术有限公司", "count": 1}, {"company": "Brother Enterprises Holding Co., Ltd.", "count": 1}, {"company": "EKY", "count": 1}, {"company": "泰尔茂", "count": 1}, {"company": "新安传媒有限公司", "count": 1}, {"company": "DHL Global Forwarding", "count": 1}, {"company": "友邦科技", "count": 1}, {"company": "Eoptolink Technology Inc., Ltd.", "count": 1}, {"company": "Lazada", "count": 1}, {"company": "Beingmate", "count": 1}, {"company": "Haleon", "count": 1}, {"company": "Sourceo", "count": 1}, {"company": "MEDx", "count": 1}], "ratio_per_week": [{"week": "2026-09-07", "accepted": 25, "rejected": 82, "total": 107, "accept_pct": 23.4}], "summary": {"total_seen": 107, "total_accepted": 25, "total_rejected": 82, "avg_fit": 27.12, "total_desired": 5, "total_runs": 1, "last_run": "2026-09-07"}, "new_jobs_per_week": [25]}, "all": {"jobs_per_week": [25], "rejected_per_week": [82], "rolling_avg": [25.0], "avg_fit_per_week": [27.12], "target_per_week": [0], "desired_per_week": [5], "cat_per_week": {"GNC/Aerospace": [0], "High-Tech/Precision": [0], "Robotics": [6], "General Control": [19], "Blacklisted-PLC": [0], "Blacklisted-Other": [0], "Rejected-Senior": [53], "Rejected-No-Gate": [29]}, "src_per_week": {"linkedin": [24], "indeed": [1], "other": [0]}, "top_companies": [{"company": "百草味", "count": 2}, {"company": "Amazon", "count": 2}, {"company": "Tederic Machinery", "count": 1}, {"company": "浙江泰普森控股集团有限公司", "count": 1}, {"company": "VBill Payment", "count": 1}, {"company": "SF Express Corporation - USA", "count": 1}, {"company": "北京英博电气股份有限公司", "count": 1}, {"company": "上海凯莱英生物技术有限公司", "count": 1}, {"company": "Brother Enterprises Holding Co., Ltd.", "count": 1}, {"company": "EKY", "count": 1}, {"company": "泰尔茂", "count": 1}, {"company": "新安传媒有限公司", "count": 1}, {"company": "DHL Global Forwarding", "count": 1}, {"company": "友邦科技", "count": 1}, {"company": "Eoptolink Technology Inc., Ltd.", "count": 1}, {"company": "Lazada", "count": 1}, {"company": "Beingmate", "count": 1}, {"company": "Haleon", "count": 1}, {"company": "Sourceo", "count": 1}, {"company": "MEDx", "count": 1}], "ratio_per_week": [{"week": "2026-W37", "accepted": 25, "rejected": 82, "total": 107, "accept_pct": 23.4}], "summary": {"total_seen": 107, "total_accepted": 25, "total_rejected": 82, "avg_fit": 27.12, "total_desired": 5, "total_runs": 1, "last_run": "2026-09-07"}, "new_jobs_per_week": [25]}, "job_records": [{"wk": "2026-W37", "sc": 110.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "Tederic Machinery", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 1}, {"wk": "2026-W37", "sc": 110.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "百草味", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 1}, {"wk": "2026-W37", "sc": 70.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "浙江泰普森控股集团有限公司", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 1}, {"wk": "2026-W37", "sc": 60.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "VBill Payment", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 1}, {"wk": "2026-W37", "sc": 60.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "SF Express Corporation - USA", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 1}, {"wk": "2026-W37", "sc": 50.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "北京英博电气股份有限公司", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 50.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "上海凯莱英生物技术有限公司", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 50.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "Brother Enterprises Holding Co., Ltd.", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 50.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "EKY", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 12.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "泰尔茂", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 10.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "新安传媒有限公司", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 10.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "DHL Global Forwarding", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 10.0, "cat": "Robotics", "tgt": 0, "src": "linkedin", "co": "友邦科技", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 4.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "Eoptolink Technology Inc., Ltd.", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "Lazada", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "百草味", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "Beingmate", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "Haleon", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "Robotics", "tgt": 0, "src": "indeed", "co": "Sourceo", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "MEDx", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "Robotics", "tgt": 0, "src": "linkedin", "co": "埃克森美孚中国 ExxonMobil China", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "Robotics", "tgt": 0, "src": "linkedin", "co": "Amazon", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "Robotics", "tgt": 0, "src": "linkedin", "co": "Johnson & Johnson MedTech", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "Robotics", "tgt": 0, "src": "linkedin", "co": "Amazon", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}, {"wk": "2026-W37", "sc": 2.0, "cat": "General Control", "tgt": 0, "src": "linkedin", "co": "北京掌上先机网络科技有限公司", "fsw": "2026-W37", "fsd": "2026-09-07", "ds": 0}], "desired_score": 60};
+const CAT_COLORS = {"GNC/Aerospace": "#1a3a5c", "High-Tech/Precision": "#2e86ab", "Robotics": "#28a745", "General Control": "#6c757d", "Blacklisted-PLC": "#dc3545", "Blacklisted-Other": "#fd7e14", "Rejected-Senior": "#ffc107", "Rejected-No-Gate": "#adb5bd"};
+const SRC_COLORS = {"linkedin": "#0a66c2", "indeed": "#2e7d32", "other": "#888888"};
+const DESIRED_SCORE = (DATA && DATA.desired_score) ? DATA.desired_score : 0;
+
+// ── Granularity state: "week" or "day" ────────────────────────────
+let GRAN = 'week';   // active granularity
+
+// Return the active label array for the current granularity.
+function activeLabels() {
+  return GRAN === 'day' ? (DATA.day_labels || []) : (DATA.week_labels || []);
+}
+
+// Return the base (pre-filter) aggregation for the current granularity.
+function baseAgg() {
+  return GRAN === 'day' ? DATA.all_daily : DATA.all_weekly;
+}
+
+// ── View state ────────────────────────────────────────────────────
+// VIEW = active aggregation (possibly score-filtered)
+// RANGE = [fromIdx, toIdx] inclusive indices into the active label array
+let VIEW  = (DATA && DATA.all_weekly) ? DATA.all_weekly : ((DATA && DATA.all) ? DATA.all : null);
+let RANGE = [0, 0];  // will be set during boot
+
+// ── Guard: no data yet ────────────────────────────────────────────
+const hasData = !!(DATA && DATA.week_labels && DATA.week_labels.length > 0 && VIEW);
+
+// ── Chart instance registry ───────────────────────────────────────
+const CHARTS = {};
+
+function destroyAllCharts() {
+  for (const key in CHARTS) {
+    if (CHARTS[key]) { CHARTS[key].destroy(); CHARTS[key] = null; }
+  }
+}
+
+// ── Slice helper: extract [from..to] inclusive from an array ──────
+function sl(arr) {
+  if (!arr) return [];
+  return arr.slice(RANGE[0], RANGE[1] + 1);
+}
+
+// ── Recompute rolling avg for the sliced window ───────────────────
+function slRolling(jobsArr) {
+  const raw = sl(jobsArr);
+  return raw.map((_, i) => {
+    const win = raw.slice(Math.max(0, i - 3), i + 1);
+    return Math.round(win.reduce((a, b) => a + b, 0) / win.length * 100) / 100;
+  });
+}
+
+// ── Granularity toggle ────────────────────────────────────────────
+function setGranularity(gran, btn) {
+  if (!hasData) return;
+  GRAN = gran;
+
+  // Update button highlight
+  document.querySelectorAll('.gran-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  // Update UI labels for range strip and breakdown table
+  const isDay = (gran === 'day');
+  document.getElementById('fromPeriodLabel').textContent = isDay ? 'From day' : 'From week';
+  document.getElementById('toPeriodLabel').textContent   = isDay ? 'To day'   : 'To week';
+  const thPeriod = document.getElementById('thPeriodCol');
+  if (thPeriod) thPeriod.textContent = isDay ? 'Day' : 'Week';
+  const titleBreakdown = document.getElementById('titleBreakdownTable');
+  if (titleBreakdown) titleBreakdown.textContent = isDay ? 'Daily Breakdown Table' : 'Weekly Breakdown Table';
+
+  // Update chart heading suffixes
+  const suffix = isDay ? 'per day' : 'per week';
+  [
+    ['titleChartWeekly',  `Jobs found ${suffix} (matched vs rejected)`],
+    ['titleChartNewJobs', `New jobs discovered ${suffix} (first appearance)`],
+    ['titleChartSource',  `Source: LinkedIn vs Indeed ${suffix}`],
+    ['titleChartTrend',   `Rolling 4-period average (matched jobs) — is the market improving?`],
+    ['titleChartFit',     `Average fit score ${suffix}`],
+    ['titleChartTarget',  `Target company appearances ${suffix}`],
+    ['titleChartDesired', `Desired matches ${suffix} (score ≥ ${DESIRED_SCORE})`],
+    ['titleChartRatio',   `Match rate: accepted / (accepted + rejected) ${suffix}`],
+  ].forEach(([id, text]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  });
+
+  // Reset VIEW to the base aggregation for the new granularity (respecting any
+  // active score filter).  refreshView() rebuilds VIEW from job_records when a
+  // filter is set, otherwise it falls back to baseAgg() which now returns the
+  // correct granularity payload.
+  const minScore    = _getMinScore();
+  const newJobScore = _getNewJobMinScore();
+  if (minScore > 0 || newJobScore > 0) {
+    let recs = DATA.job_records || [];
+    if (minScore > 0) recs = recs.filter(r => r.sc >= minScore);
+    VIEW = _rebuildViewFromRecords(recs);
+  } else {
+    VIEW = baseAgg();
+  }
+
+  // Re-initialise range UI for the new label set, then re-render.
+  initRangeUI();
+}
+
+// ── Range selector helpers ────────────────────────────────────────
+function initRangeUI() {
+  if (!hasData) return;
+  const labels = activeLabels();
+  const from = document.getElementById('fromPeriod');
+  const to   = document.getElementById('toPeriod');
+  from.innerHTML = labels.map((l, i) => `<option value="${i}">${l}</option>`).join('');
+  to.innerHTML   = labels.map((l, i) => `<option value="${i}">${l}</option>`).join('');
+  document.getElementById('rangeStrip').style.display  = '';
+  document.getElementById('granToggle').style.display  = '';
+
+  // Default: weekly → last 8, daily → last 30
+  const defaultN   = GRAN === 'day' ? 30 : 8;
+  // Find the quick-range button that matches the default N.
+  // Buttons are: Last 4, Last 8, Last 12, Last 30, All time
+  const quickBtns = document.querySelectorAll('.range-btn');
+  let defaultBtn = null;
+  quickBtns.forEach(b => {
+    const match = b.textContent.match(/\d+/);
+    if (match && parseInt(match[0], 10) === defaultN) defaultBtn = b;
+  });
+  setQuickRange(defaultN, defaultBtn);
+}
+
+function applyRange(fromIdx, toIdx) {
+  const labels = activeLabels();
+  RANGE[0] = Math.max(0, fromIdx);
+  RANGE[1] = Math.min(labels.length - 1, toIdx);
+  document.getElementById('fromPeriod').value = RANGE[0];
+  document.getElementById('toPeriod').value   = RANGE[1];
+}
+
+function setQuickRange(n, btn) {
+  // Highlight active button
+  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const total = activeLabels().length;
+  if (n === 0 || n >= total) {
+    applyRange(0, total - 1);
+  } else {
+    applyRange(total - n, total - 1);
+  }
+  destroyAllCharts();
+  renderAll();
+}
+
+function onRangeDropdown() {
+  // Clear quick-range highlight when user manually picks dropdowns
+  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  const from = parseInt(document.getElementById('fromPeriod').value, 10);
+  const to   = parseInt(document.getElementById('toPeriod').value,   10);
+  if (from <= to) {
+    RANGE[0] = from;
+    RANGE[1] = to;
+    destroyAllCharts();
+    renderAll();
+  }
+}
+
+// ── Stat cards ────────────────────────────────────────────────────
+function renderStatCards() {
+  if (!hasData) return;
+  const container = document.getElementById('statCards');
+
+  // Compute stats for selected range
+  const slMatched  = sl(VIEW.jobs_per_week);
+  const slRejected = sl(VIEW.rejected_per_week);
+  const slFit      = sl(VIEW.avg_fit_per_week);
+  const slTarget   = sl(VIEW.target_per_week);
+
+  const totalMatched  = slMatched.reduce((a, b) => a + b, 0);
+  const totalRejected = slRejected.reduce((a, b) => a + b, 0);
+  const totalTarget   = slTarget.reduce((a, b) => a + b, 0);
+  const matchRate     = (totalMatched + totalRejected) > 0
+    ? ((totalMatched / (totalMatched + totalRejected)) * 100).toFixed(1)
+    : '—';
+  const fitVals = slFit.filter(v => v > 0);
+  const avgFit  = fitVals.length
+    ? (fitVals.reduce((a, b) => a + b, 0) / fitVals.length).toFixed(2)
+    : '—';
+
+  // Trend: compare current range to equal-length prior period
+  const rangeLen = RANGE[1] - RANGE[0] + 1;
+  const prevStart = RANGE[0] - rangeLen;
+  let trendHtml = '';
+  if (prevStart >= 0) {
+    const prevMatched = VIEW.jobs_per_week.slice(prevStart, RANGE[0]).reduce((a, b) => a + b, 0);
+    const delta = totalMatched - prevMatched;
+    if (delta > 0)      trendHtml = `<span class="stat-trend up">&#8593; +${delta} vs prev period</span>`;
+    else if (delta < 0) trendHtml = `<span class="stat-trend down">&#8595; ${delta} vs prev period</span>`;
+    else                trendHtml = `<span class="stat-trend flat">&#8212; no change</span>`;
+  }
+
+  const slDesired = DESIRED_SCORE > 0 ? sl(VIEW.desired_per_week || []) : [];
+  const totalDesired = slDesired.reduce((a, b) => a + b, 0);
+
+  const s = VIEW.summary;
+  const _al = activeLabels();
+  const rangeLabel = `${_al[RANGE[0]]} – ${_al[RANGE[1]]}`;
+
+  container.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value">${s.total_runs}</div>
+      <div class="stat-label">Total scrape runs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${totalMatched}</div>
+      <div class="stat-label">Jobs matched</div>
+      ${trendHtml}
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${totalRejected}</div>
+      <div class="stat-label">Jobs rejected</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${matchRate}%</div>
+      <div class="stat-label">Match rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${avgFit}</div>
+      <div class="stat-label">Avg fit score</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${totalTarget}</div>
+      <div class="stat-label">Target company hits</div>
+    </div>
+    ${DESIRED_SCORE > 0 ? `
+    <div class="stat-card">
+      <div class="stat-value" style="color:#c0392b;">${totalDesired}</div>
+      <div class="stat-label">Desired matches (score &ge; ${DESIRED_SCORE})</div>
+    </div>` : ''}
+  `;
+}
+
+// ── Chart defaults ────────────────────────────────────────────────
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+Chart.defaults.font.size   = 11;
+Chart.defaults.color       = '#666';
+const GRID_COLOR = 'rgba(0,0,0,0.06)';
+
+function baseScales(stacked) {
+  return {
+    x: {
+      stacked: stacked || false,
+      grid: { color: GRID_COLOR },
+      ticks: { maxRotation: 45 },
+    },
+    y: {
+      stacked: stacked || false,
+      grid: { color: GRID_COLOR },
+      beginAtZero: true,
+    },
+  };
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ── Chart 1: Weekly matched + rejected bar ───────────────────────
+function buildChartWeekly() {
+  if (!hasData) return;
+  CHARTS.weekly = new Chart(document.getElementById('chartWeekly'), {
+    type: 'line',
+    data: {
+      labels: sl(activeLabels()),
+      datasets: [
+        {
+          label: 'Matched',
+          data: sl(VIEW.jobs_per_week),
+          borderColor: '#2e86ab',
+          backgroundColor: '#2e86ab22',
+          borderWidth: 2, pointRadius: 3, fill: true, tension: 0.3,
+        },
+        {
+          label: 'Rejected / Blacklisted',
+          data: sl(VIEW.rejected_per_week),
+          borderColor: '#dc3545',
+          backgroundColor: '#dc354522',
+          borderWidth: 2, pointRadius: 3, fill: true, tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: baseScales(false),
+    },
+  });
+}
+
+// ── Chart 2: Category stacked area line ──────────────────────────
+function buildChartCategory() {
+  if (!hasData) return;
+  const slLabels = sl(activeLabels());
+  const datasets = Object.entries(VIEW.cat_per_week).map(([cat, vals]) => {
+    const color = CAT_COLORS[cat] || '#999999';
+    return {
+      label: cat,
+      data: sl(vals),
+      borderColor: color,
+      backgroundColor: hexToRgba(color.length === 7 ? color : '#999999', 0.18),
+      borderWidth: 2,
+      pointRadius: 2,
+      fill: true,
+      tension: 0.3,
+    };
+  });
+  CHARTS.category = new Chart(document.getElementById('chartCategory'), {
+    type: 'line',
+    data: { labels: slLabels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+      scales: baseScales(true),
+    },
+  });
+}
+
+// ── Chart 3: Source line chart ────────────────────────────────────
+function buildChartSource() {
+  if (!hasData) return;
+  const slLabels = sl(activeLabels());
+  const datasets = Object.entries(VIEW.src_per_week).map(([src, vals]) => {
+    const color = SRC_COLORS[src] || '#888888';
+    return {
+      label: src.charAt(0).toUpperCase() + src.slice(1),
+      data: sl(vals),
+      borderColor: color,
+      backgroundColor: hexToRgba(color, 0.08),
+      borderWidth: 2,
+      pointRadius: 3,
+      fill: false,
+      tension: 0.3,
+    };
+  });
+  CHARTS.source = new Chart(document.getElementById('chartSource'), {
+    type: 'line',
+    data: { labels: slLabels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: baseScales(false),
+    },
+  });
+}
+
+// ── Chart: New jobs discovered per period ────────────────────────
+function buildChartNewJobs() {
+  if (!hasData) return;
+  const newArr       = sl(VIEW.new_jobs_per_week || []);
+  const totalArr     = sl(VIEW.jobs_per_week);
+  const returningArr = totalArr.map((t, i) => Math.max(0, t - (newArr[i] || 0)));
+  CHARTS.newJobs = new Chart(document.getElementById('chartNewJobs'), {
+    type: 'line',
+    data: {
+      labels: sl(activeLabels()),
+      datasets: [
+        {
+          label: 'New (first appearance)',
+          data: newArr,
+          borderColor: '#1a3a5c',
+          backgroundColor: '#1a3a5c22',
+          borderWidth: 2, pointRadius: 3, fill: true, tension: 0.3,
+        },
+        {
+          label: 'Returning (seen before)',
+          data: returningArr,
+          borderColor: '#28a745',
+          backgroundColor: '#28a74522',
+          borderWidth: 2, pointRadius: 3, fill: true, tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: baseScales(true),
+    },
+  });
+}
+
+// ── Chart 4: Rolling trend line ───────────────────────────────────
+function buildChartTrend() {
+  if (!hasData) return;
+  CHARTS.trend = new Chart(document.getElementById('chartTrend'), {
+    type: 'line',
+    data: {
+      labels: sl(activeLabels()),
+      datasets: [
+        {
+          label: 'Weekly matched',
+          data: sl(VIEW.jobs_per_week),
+          borderColor: '#2e86ab44',
+          backgroundColor: '#2e86ab11',
+          borderWidth: 1,
+          pointRadius: 2,
+          fill: true,
+          tension: 0.3,
+        },
+        {
+          label: '4-week rolling avg',
+          data: slRolling(VIEW.jobs_per_week),
+          borderColor: '#1a3a5c',
+          backgroundColor: 'transparent',
+          borderWidth: 2.5,
+          pointRadius: 3,
+          fill: false,
+          tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: baseScales(false),
+    },
+  });
+}
+
+// ── Chart 5: Avg fit score line ───────────────────────────────────
+function buildChartFit() {
+  if (!hasData) return;
+  CHARTS.fit = new Chart(document.getElementById('chartFit'), {
+    type: 'line',
+    data: {
+      labels: sl(activeLabels()),
+      datasets: [{
+        label: 'Avg fit score (matched)',
+        data: sl(VIEW.avg_fit_per_week),
+        borderColor: '#28a745',
+        backgroundColor: '#28a74511',
+        borderWidth: 2,
+        pointRadius: 3,
+        fill: true,
+        tension: 0.3,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        ...baseScales(false),
+        y: { ...baseScales(false).y, min: 0 },
+      },
+    },
+  });
+}
+
+// ── Chart 6: Target company count per period ─────────────────────
+function buildChartTarget() {
+  if (!hasData) return;
+  CHARTS.target = new Chart(document.getElementById('chartTarget'), {
+    type: 'line',
+    data: {
+      labels: sl(activeLabels()),
+      datasets: [{
+        label: 'Target company matches',
+        data: sl(VIEW.target_per_week),
+        borderColor: '#f39c12',
+        backgroundColor: '#f39c1222',
+        borderWidth: 2, pointRadius: 3, fill: true, tension: 0.3,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: baseScales(false),
+    },
+  });
+}
+
+// ── Chart: Desired matches per period ────────────────────────────
+function buildChartDesired() {
+  const card = document.getElementById('chartDesiredCard');
+  if (!hasData || DESIRED_SCORE <= 0) {
+    if (card) card.style.display = 'none';
+    return;
+  }
+  if (card) card.style.display = '';
+  CHARTS.desired = new Chart(document.getElementById('chartDesired'), {
+    type: 'line',
+    data: {
+      labels: sl(activeLabels()),
+      datasets: [{
+        label: `Desired matches (score ≥ ${DESIRED_SCORE})`,
+        data: sl(VIEW.desired_per_week || []),
+        borderColor: '#c0392b',
+        backgroundColor: '#c0392b22',
+        borderWidth: 2, pointRadius: 3, fill: true, tension: 0.3,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: baseScales(false),
+    },
+  });
+}
+
+// ── Chart 7: Match rate line ──────────────────────────────────────
+function buildChartRatio() {
+  if (!hasData) return;
+  // Recompute ratio from sliced matched/rejected so the % is correct for the window
+  const slMatched  = sl(VIEW.jobs_per_week);
+  const slRejected = sl(VIEW.rejected_per_week);
+  const pcts = slMatched.map((m, i) => {
+    const total = m + slRejected[i];
+    return total ? Math.round(m / total * 1000) / 10 : 0;
+  });
+  CHARTS.ratio = new Chart(document.getElementById('chartRatio'), {
+    type: 'line',
+    data: {
+      labels: sl(activeLabels()),
+      datasets: [{
+        label: 'Match rate (%)',
+        data: pcts,
+        borderColor: '#856404',
+        backgroundColor: '#ffc10711',
+        borderWidth: 2,
+        pointRadius: 3,
+        fill: true,
+        tension: 0.3,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        ...baseScales(false),
+        y: { ...baseScales(false).y, min: 0, max: 100,
+               ticks: { callback: v => v + '%' } },
+      },
+    },
+  });
+}
+
+// ── Chart 8: Top companies horizontal bar ────────────────────────
+function buildChartCompanies() {
+  if (!hasData) return;
+  // Use full (non-sliced) top_companies from VIEW — the top-companies list
+  // is pre-aggregated all-time but we display top 10 here
+  const top10 = VIEW.top_companies.slice(0, 10);
+  if (!top10.length) return;
+  CHARTS.companies = new Chart(document.getElementById('chartCompanies'), {
+    type: 'bar',
+    data: {
+      labels: top10.map(r => r.company),
+      datasets: [{
+        label: 'Appearances',
+        data: top10.map(r => r.count),
+        backgroundColor: '#2e86ab',
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: GRID_COLOR }, beginAtZero: true },
+        y: { grid: { color: 'transparent' }, ticks: { font: { size: 11 } } },
+      },
+    },
+  });
+}
+
+// ── Top companies table ───────────────────────────────────────────
+function buildCompanyTable() {
+  if (!hasData) return;
+  const tbody = document.getElementById('companyTbody');
+  if (!VIEW.top_companies.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="no-data">No companies in this view.</td></tr>';
+    return;
+  }
+  const maxCount  = VIEW.top_companies[0].count;
+  const totalAcc  = VIEW.summary.total_accepted;
+  tbody.innerHTML = VIEW.top_companies.map((row, i) => {
+    const pct   = maxCount ? Math.round(row.count / maxCount * 100) : 0;
+    const share = totalAcc ? ((row.count / totalAcc) * 100).toFixed(1) + '%' : '—';
+    return `<tr>
+      <td>${i + 1}</td>
+      <td>${row.company}</td>
+      <td>
+        <div class="bar-cell">
+          <span>${row.count}</span>
+          <div class="mini-bar"><div class="mini-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+      </td>
+      <td>${share}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Period breakdown table (with sort) ───────────────────────────
+let _weekSortCol = 0;   // default sort: Period column
+let _weekSortDir = -1;  // -1 = desc (newest first)
+
+function buildWeekTable() {
+  if (!hasData) return;
+  const tbody  = document.getElementById('weekTbody');
+  const labels = activeLabels();
+
+  // Build row data for the selected range (newest first default)
+  const rows = [];
+  for (let i = RANGE[0]; i <= RANGE[1]; i++) {
+    const matched  = VIEW.jobs_per_week[i];
+    const rejected = VIEW.rejected_per_week[i];
+    const total    = matched + rejected;
+    const matchPct = total ? ((matched / total) * 100) : null;
+    const avgFit   = VIEW.avg_fit_per_week[i];
+    const target   = VIEW.target_per_week[i];
+    const rolling  = VIEW.rolling_avg[i];
+
+    let trendBadge = '';
+    if (i > 0) {
+      const prev  = VIEW.rolling_avg[i - 1];
+      const delta = rolling - prev;
+      if (delta > 0.3)       trendBadge = '<span class="trend-badge trend-up">improving</span>';
+      else if (delta < -0.3) trendBadge = '<span class="trend-badge trend-down">declining</span>';
+      else                   trendBadge = '<span class="trend-badge trend-flat">stable</span>';
+    }
+
+    rows.push({
+      week:      labels[i],
+      matched,
+      rejected,
+      matchPct:  matchPct !== null ? matchPct : -1,
+      avgFit:    avgFit || 0,
+      target,
+      trendBadge,
+      // sortable numeric values for each column (col index matches th data-col)
+      sortVals: [labels[i], matched, rejected, matchPct !== null ? matchPct : -1, avgFit || 0, target],
+    });
+  }
+
+  // Sort
+  rows.sort((a, b) => {
+    const av = a.sortVals[_weekSortCol];
+    const bv = b.sortVals[_weekSortCol];
+    if (av < bv) return _weekSortDir;
+    if (av > bv) return -_weekSortDir;
+    return 0;
+  });
+
+  tbody.innerHTML = rows.map(r => `<tr>
+    <td>${r.week}</td>
+    <td>${r.matched}</td>
+    <td>${r.rejected}</td>
+    <td>${r.matchPct >= 0 ? r.matchPct.toFixed(0) + '%' : '—'}</td>
+    <td>${r.avgFit || '—'}</td>
+    <td>${r.target}</td>
+    <td>${r.trendBadge}</td>
+  </tr>`).join('');
+}
+
+function sortWeekTable(th) {
+  const col = parseInt(th.dataset.col, 10);
+  // Toggle direction if same column, else reset to desc
+  if (_weekSortCol === col) {
+    _weekSortDir = -_weekSortDir;
+  } else {
+    _weekSortCol = col;
+    _weekSortDir = -1;
+  }
+  // Update header classes
+  document.querySelectorAll('#weekTable th.sortable').forEach(h => {
+    h.classList.remove('sort-asc', 'sort-desc');
+  });
+  th.classList.add(_weekSortDir === -1 ? 'sort-desc' : 'sort-asc');
+  buildWeekTable();
+}
+
+// ── Render everything ─────────────────────────────────────────────
+function renderAll() {
+  renderStatCards();
+  buildChartWeekly();
+  buildChartNewJobs();
+  buildChartSource();
+  buildChartTrend();
+  buildChartFit();
+  buildChartTarget();
+  buildChartDesired();
+  buildChartRatio();
+  buildChartCompanies();
+  buildCompanyTable();
+  buildWeekTable();
+}
+
+// ── Score-filter re-aggregation ───────────────────────────────────
+// When a min-score filter is active we rebuild VIEW from DATA.job_records
+// (individual accepted jobs) so the charts reflect exactly the filtered
+// subset.  Rejected counts become 0 in this mode (rejected jobs have no
+// score and are not in job_records).
+
+const _ALL_CATS = [
+  "GNC/Aerospace","High-Tech/Precision","Robotics","General Control",
+  "Blacklisted-PLC","Blacklisted-Other","Rejected-Senior","Rejected-No-Gate"
+];
+const _SRCS = ["linkedin","indeed","other"];
+
+function _rebuildViewFromRecords(recs) {
+  // recs = already-filtered subset of DATA.job_records
+  // Uses GRAN to decide whether to bucket by ISO week (r.wk / r.fsw) or
+  // calendar day (r.fsd — first-seen YYYY-MM-DD).
+  const labels = activeLabels();
+  const pkIdx  = {};
+  labels.forEach((lbl, i) => pkIdx[lbl] = i);
+  const n = labels.length;
+
+  const isDay = (GRAN === 'day');
+
+  const jobsArr     = new Array(n).fill(0);
+  const fitSum      = new Array(n).fill(0);
+  const fitCnt      = new Array(n).fill(0);
+  const tgtArr      = new Array(n).fill(0);
+  const desiredArr  = new Array(n).fill(0);
+  const catArr      = Object.fromEntries(_ALL_CATS.map(c => [c, new Array(n).fill(0)]));
+  const srcArr      = Object.fromEntries(_SRCS.map(s => [s, new Array(n).fill(0)]));
+  const coCounts    = {};
+
+  for (const r of recs) {
+    // Pick the period key depending on granularity.
+    // For daily mode, r.fsd (first-seen date) is the bucket key.
+    // For weekly mode, r.wk (run-week) is the bucket key.
+    const pk = isDay ? r.fsd : r.wk;
+    const i  = pkIdx[pk];
+    if (i === undefined) continue;
+    jobsArr[i]++;
+    fitSum[i]  += r.sc;
+    fitCnt[i]++;
+    if (r.tgt) tgtArr[i]++;
+    if (DESIRED_SCORE > 0 && r.sc >= DESIRED_SCORE) desiredArr[i]++;
+    const cat = _ALL_CATS.includes(r.cat) ? r.cat : "General Control";
+    catArr[cat][i]++;
+    const src = _SRCS.includes(r.src) ? r.src : "other";
+    srcArr[src][i]++;
+    coCounts[r.co] = (coCounts[r.co] || 0) + 1;
+  }
+
+  const rolling = jobsArr.map((_, i) => {
+    const win = jobsArr.slice(Math.max(0, i - 3), i + 1);
+    return Math.round(win.reduce((a, b) => a + b, 0) / win.length * 100) / 100;
+  });
+  const avgFitArr = jobsArr.map((_, i) =>
+    fitCnt[i] ? Math.round(fitSum[i] / fitCnt[i] * 100) / 100 : 0
+  );
+  const topCo = Object.entries(coCounts)
+    .sort((a, b) => b[1] - a[1]).slice(0, 20)
+    .map(([company, count]) => ({ company, count }));
+  const totalAcc  = recs.length;
+  const avgFitAll = totalAcc
+    ? Math.round(recs.reduce((s, r) => s + r.sc, 0) / totalAcc * 100) / 100
+    : 0;
+
+  // new_jobs: count per-period using the first-seen key (fsw for weekly, fsd for daily).
+  // Apply the new-job score filter (separate dimension) from #newJobScoreFilter.
+  const newJobMinScore = parseFloat(document.getElementById('newJobScoreFilter')?.value) || 0;
+  const newJobsArr = labels.map(lbl =>
+    (DATA.job_records || []).filter(r => {
+      const fsKey = isDay ? r.fsd : r.fsw;
+      return fsKey === lbl && r.sc >= newJobMinScore;
+    }).length
+  );
+
+  const baseSum = isDay ? DATA.all_daily?.summary : DATA.all_weekly?.summary;
+  return {
+    jobs_per_week:     jobsArr,
+    rejected_per_week: new Array(n).fill(0),
+    rolling_avg:       rolling,
+    avg_fit_per_week:  avgFitArr,
+    target_per_week:   tgtArr,
+    desired_per_week:  desiredArr,
+    cat_per_week:      catArr,
+    src_per_week:      srcArr,
+    top_companies:     topCo,
+    ratio_per_week:    jobsArr.map(m => ({ accepted: m, rejected: 0, total: m, accept_pct: 100 })),
+    new_jobs_per_week: newJobsArr,
+    summary: {
+      total_seen:     totalAcc,
+      total_accepted: totalAcc,
+      total_rejected: 0,
+      avg_fit:        avgFitAll,
+      total_desired:  desiredArr.reduce((a, b) => a + b, 0),
+      total_runs:     baseSum?.total_runs || 0,
+      last_run:       baseSum?.last_run   || '',
+    },
+  };
+}
+
+function _getMinScore() {
+  const v = parseFloat(document.getElementById('minScoreFilter').value);
+  return isNaN(v) ? 0 : v;
+}
+
+function _getNewJobMinScore() {
+  const v = parseFloat(document.getElementById('newJobScoreFilter').value);
+  return isNaN(v) ? 0 : v;
+}
+
+// ── Unified view refresh (score filter) ───────────────────────────
+function refreshView() {
+  if (!hasData) return;
+  const minScore    = _getMinScore();
+  const newJobScore = _getNewJobMinScore();
+
+  if (minScore > 0 || newJobScore > 0) {
+    // Filter individual records and re-aggregate
+    let recs = DATA.job_records || [];
+    if (minScore > 0) {
+      recs = recs.filter(r => r.sc >= minScore);
+    }
+    VIEW = _rebuildViewFromRecords(recs);
+  } else {
+    // No filters active — use the fast pre-aggregated payload for current granularity.
+    VIEW = baseAgg();
+  }
+
+  destroyAllCharts();
+  renderAll();
+}
+
+function onScoreFilter()       { if (hasData) refreshView(); }
+function onNewJobScoreFilter() { if (hasData) refreshView(); }
+
+// ── Boot ──────────────────────────────────────────────────────────
+if (hasData) {
+  initRangeUI();  // sets RANGE and calls renderAll() via setQuickRange
+} else {
+  renderAll();    // renders "no data" state
+}
+</script>
+</body>
+</html>

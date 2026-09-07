@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archive — 外贸 / 跨境电商求职看板</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f0f2f5; color: #2c3e50;
+}
+header {
+  background: #1a3a5c; color: white; padding: 22px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 10px;
+}
+header h1 { font-size: 21px; font-weight: 600; }
+header p  { font-size: 12px; opacity: 0.65; margin-top: 5px; }
+.nav-link {
+  color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 500;
+  text-decoration: none; border: 1px solid rgba(255,255,255,0.4);
+  padding: 6px 14px; border-radius: 6px; white-space: nowrap;
+}
+.nav-link:hover { background: rgba(255,255,255,0.15); }
+.section-header {
+  padding: 20px 32px 8px;
+  font-size: 16px; font-weight: 700; color: #1a3a5c;
+  border-left: 4px solid #2e86ab;
+  margin: 24px 32px 0;
+  background: white;
+  border-radius: 8px 8px 0 0;
+  border-top: 1px solid #e8e8e8;
+  border-right: 1px solid #e8e8e8;
+}
+.grid {
+  padding: 0 32px 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px;
+  background: white;
+  border-radius: 0 0 8px 8px;
+  border: 1px solid #e8e8e8;
+  border-top: none;
+  margin: 0 32px 8px;
+  padding-top: 16px;
+}
+.card {
+  background: #f8fafc; border-radius: 10px; padding: 18px 20px;
+  border: 1px solid #e8e8e8; display: flex; flex-direction: column; gap: 8px;
+}
+.card:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.09); }
+.target-card { border-left: 4px solid #f39c12; }
+.applied-card { border-left: 4px solid #166534; }
+.card-header {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 8px;
+}
+.card-header h3 { font-size: 14px; font-weight: 600; line-height: 1.35; }
+.card-header h3 a { color: #1a3a5c; text-decoration: none; }
+.card-header h3 a:hover { text-decoration: underline; }
+.badges { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; align-items: flex-end; }
+.badge {
+  font-size: 10px; padding: 2px 7px; border-radius: 10px;
+  white-space: nowrap; font-weight: 500;
+}
+.badge-target   { background: #fef3cd; color: #856404; }
+.badge-linkedin { background: #e8f4fd; color: #0a66c2; }
+.badge-indeed   { background: #e8f8f0; color: #2e7d32; }
+.badge-expired  { background: #f3f4f6; color: #6b7280; }
+.badge-applied  { background: #dcfce7; color: #166534; font-weight: 700; }
+.badge-desired  { background: #fde8e8; color: #c0392b; border: 1px solid #e74c3c; font-weight: 700; }
+.card-meta {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  font-size: 12px; color: #666;
+}
+.score-row {
+  display: flex; align-items: center; gap: 8px; font-size: 12px;
+}
+.score-label { color: #888; flex-shrink: 0; }
+.score-num   { font-weight: 700; flex-shrink: 0; min-width: 36px; }
+.score-high  { color: #1e7e34; }
+.score-mid   { color: #856404; }
+.score-low   { color: #721c24; }
+.score-bar {
+  flex: 1; height: 6px; background: #e8e8e8;
+  border-radius: 4px; overflow: hidden;
+}
+.bar-fill {
+  height: 100%; border-radius: 4px;
+}
+.bar-fill.score-high { background: #28a745; }
+.bar-fill.score-mid  { background: #ffc107; }
+.bar-fill.score-low  { background: #dc3545; }
+.keywords { font-size: 11px; color: #999; }
+.job-desc { font-size: 12px; color: #666; margin-top: 6px; line-height: 1.5; }
+.undo-btn {
+  display: inline-block; margin-top: 4px;
+  padding: 5px 12px; background: #166534;
+  color: white; border-radius: 6px; font-size: 11px;
+  border: none; cursor: pointer; font-weight: 500;
+}
+.undo-btn:hover { background: #14532d; }
+.view-btn {
+  display: inline-block; margin-top: 4px;
+  padding: 5px 12px; background: #1a3a5c;
+  color: white; border-radius: 6px; font-size: 12px;
+  text-decoration: none; font-weight: 500; align-self: flex-start;
+}
+.view-btn:hover { background: #2e6da4; }
+.restore-btn {
+  display: inline-block; margin-top: 4px;
+  padding: 5px 12px; background: #e74c3c;
+  color: white; border-radius: 6px; font-size: 11px;
+  border: none; cursor: pointer; font-weight: 500;
+}
+.restore-btn:hover { background: #c0392b; }
+.badge-discarded { background: #fde8e8; color: #c0392b; font-weight: 700; }
+.empty-state {
+  padding: 40px 32px; text-align: center; color: #888; font-size: 14px;
+  font-style: italic;
+}
+.filter-bar {
+  padding: 12px 32px; background: white;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  font-size: 13px;
+}
+.filter-bar strong { color: #1a3a5c; font-size: 12px; margin-right: 4px; }
+.filter-btn {
+  padding: 4px 13px; border-radius: 20px;
+  border: 1px solid #d0d0d0; background: #f5f5f5;
+  cursor: pointer; font-size: 12px; font-weight: 500; color: #444;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.filter-btn.active, .filter-btn:hover {
+  background: #1a3a5c; color: white; border-color: #1a3a5c;
+}
+.date-input {
+  padding: 4px 8px; border: 1px solid #d0d0d0;
+  border-radius: 6px; font-size: 12px; color: #444;
+}
+.filter-sep { color: #ccc; font-size: 12px; }
+footer {
+  text-align: center; padding: 24px; font-size: 11px; color: #bbb;
+}
+@media (max-width: 600px) {
+  .grid { padding: 12px 16px; grid-template-columns: 1fr; margin: 0 16px 8px; }
+  header, .section-header { padding-left: 16px; padding-right: 16px; }
+  .section-header { margin: 16px 16px 0; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Archive — 外贸 / 跨境电商求职看板</h1>
+    <p>Updated: 07 September 2026 at 13:23 UTC</p>
+  </div>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <a class="nav-link" href="index.html">Live Job Board</a>
+    <a class="nav-link" href="analytics.html">Analytics</a>
+    <a class="nav-link" href="settings.html">&#9881; Settings</a>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <strong>Show:</strong>
+  <button class="filter-btn active" onclick="setPreset('all', this)">All time</button>
+  <button class="filter-btn" onclick="setPreset('7', this)">Last 7 days</button>
+  <button class="filter-btn" onclick="setPreset('30', this)">Last 30 days</button>
+  <button class="filter-btn" onclick="setPreset('90', this)">Last 90 days</button>
+  <span class="filter-sep">&nbsp;|&nbsp;Custom:</span>
+  <input type="date" class="date-input" id="dateFrom" onchange="setCustom()">
+  <span class="filter-sep">—</span>
+  <input type="date" class="date-input" id="dateTo" onchange="setCustom()">
+</div>
+
+<div id="appliedSection">
+  <div class="section-header">Applied Jobs (<span id="appliedSectionCount">0</span>)</div>
+  <div class="grid" id="appliedGrid">
+    <div class="empty-state" id="appliedEmpty">No applied jobs yet. Mark jobs as Applied on the Live Job Board.</div>
+  </div>
+</div>
+
+<div id="maybeSection">
+  <div class="section-header">Maybe / Possible (<span id="maybeSectionCount">0</span>)</div>
+  <div class="grid" id="maybeGrid">
+    <div class="empty-state" id="maybeEmpty">No maybe jobs yet. Mark jobs as Maybe on the Live Job Board.</div>
+  </div>
+</div>
+
+<div id="expiredSection">
+  <div class="section-header">Expired Jobs (<span id="expiredSectionCount">0</span>)</div>
+  <div class="grid" id="expiredGrid">
+    <div class="empty-state" id="expiredEmpty">No expired jobs yet.</div>
+  </div>
+</div>
+
+<div id="discardedSection">
+  <div class="section-header">Discarded Jobs (<span id="discardedSectionCount">0</span>)</div>
+  <div class="grid" id="discardedGrid">
+    <div class="empty-state" id="discardedEmpty">No discarded jobs yet.</div>
+  </div>
+</div>
+
+<footer>
+  Auto-generated by job_searcher.py &nbsp;&middot;&nbsp;
+  Applied and Discarded state is stored in your browser&apos;s localStorage
+</footer>
+
+<script>
+const ARCHIVE_DATA = {"jobs": [{"id": "2932cf22b79928371cb45e2a504ece36", "title": "海外销售", "company": "Tederic Machinery", "location": "Hangzhou, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4461809207", "site": "linkedin", "score": 110.0, "keywords": ["外贸业务", "海外销售", "客户开发"], "is_target": false, "date_posted": "2026-09-06", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 职责描述： 1、根据区域销售任务，负责区域客户开发，确定市场计划并努力完成指标； 2、协助部门总监建立海外营销网络，管理协调各销售驻点的整体运作； 3、跟进跟踪客户订单信息，确保及时出货； 4、开展当地经销商网络建设，并进行管理维护； 5、收集客户情报信息及时反馈，协助公司制定各项营销策略； 6、维护良好的客情关系，定期拜访，维护公司良好的品牌以及形象。 任职要求： 1、 本科以..."}, {"id": "6ad0b48af741d55ec64235cfd9bab028", "title": "海外销售（欧美方向） (MJ001168)", "company": "百草味", "location": "Hangzhou, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4460772392", "site": "linkedin", "score": 110.0, "keywords": ["海外销售", "跨境电商", "海外市场"], "is_target": false, "date_posted": "2026-09-04", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 【工作职责】 1\\.海外目标市场调研：研究海外市场趋势、竞品动态、消费者需求，为决策提供数据支持。\n   \n\n  \n\n* 销售目标管理：制定海外销售计划，监督执行并优化策略以确保业绩达成。\n* 渠道开发与管理：负责海外对应区域经销商及客户群BD工作，建立海外分销网络（代理商、经销商、电商平台），优化渠道布局。\n* 客户关系管理：主动了解和深入挖掘客户需求，定期拜访重点客户（含海外..."}, {"id": "d7fddfb276af786249e39abe64e853d6", "title": "外贸业务员", "company": "浙江泰普森控股集团有限公司", "location": "Hangzhou, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4461820144", "site": "linkedin", "score": 70.0, "keywords": ["外贸业务", "客户开发", "展会"], "is_target": false, "date_posted": "2026-09-06", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 岗位职责： 1、负责新客户开发和大客户维护工作，能够维护良好的客户关系； 2、协助开发新产品、新市场，包括客户潜力挖掘，市场信息挖掘，对行业、产品、市场等有较深刻的认识； 3、负责联系客户、编制报价、参与商务谈判，签订合同； 4、负责客户下单后按客户PO及时制作销售合同并下达工厂生产； 5、负责大货生产的跟踪工作，并组织验厂、验货、发货； 6、业务相关资料的整理和归档。\n   \n..."}, {"id": "49a582d133f5c399fb09d5c132d7c2d5", "title": "电商与流通行业客户运维保障专员（阿里）", "company": "SF Express Corporation - USA", "location": "Hangzhou, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4460493322", "site": "linkedin", "score": 60.0, "keywords": ["跨境电商", "国际业务"], "is_target": false, "date_posted": "2026-09-03", "first_seen": "2026-09-07", "is_expired": false, "description": "职位搜索\n *这里有全国各地的职位、总有一个适合您* \n*首页 \\> 社会招聘 \\> 职位搜索*\n 职位名称：\n *电商与流通行业客户运维保障专员（阿里）*\n* 招聘人数：2人\n* 有效期：长期招聘\n* 学历要求： 大学本科\n* 经验要求: 5\\-10年\n* 薪酬范围： 面议\n\n\n 工作职责：\n   \n\n  \n\n 1、负责跨境进出口业务的运营保障和运营解决方案支持，搭建落地SOP和运营监控机制，协..."}, {"id": "cb7b3141c37d19539a7f9376e841ed6e", "title": "CoGolinks跨境销售BD", "company": "VBill Payment", "location": "Hangzhou, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4461819262", "site": "linkedin", "score": 60.0, "keywords": ["跨境电商", "海外市场"], "is_target": false, "date_posted": "2026-09-06", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 职责描述： 1\\.推广跨境支付产品，维护客户关系，不断的提高产品的市场占有率； 2\\.有跨境物流、跨境电商、VAT、 退税、金融、广告等咨询服务的能力，帮助客户更好的拓展海外市场； 3\\.对竞品及潜在市场进行分析，深度挖掘客户需求，推动公司产品的更新的迭代，给客户提供更专业的产品和服务； 任职要求： 1\\.1\\-3年客户跨境电商、国际贸易、互联网相关行业经验； 2\\.具备独谈判及..."}, {"id": "3c670c1b3550cffc4f4675b5b768051b", "title": "27校招-业务经营", "company": "上海凯莱英生物技术有限公司", "location": "Hangzhou, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4461418396", "site": "linkedin", "score": 50.0, "keywords": ["外贸业务"], "is_target": false, "date_posted": "2026-09-05", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 【岗位职责】 1\\.开展业务部门经营品种的基本面研究，负责数据收集、更新，及时跟踪品种信息与市场动态； 2\\.负责与国内外客户沟通协调，建立并维护上下游关系； 3\\.负责商品采购销售、物流仓储、金融服务等其他供应链集成服务及供应链项目管理工作。 【岗位要求】 1\\.本科及以上学历和学位应届或工作经验两年内的往届毕业生； 2\\.经济、金融、管理、数学、化工等相关专业优先； 3\\.具..."}, {"id": "57aceca955ad7fe5146fcfa769cb92db", "title": "外贸销售员（2027届管培生）", "company": "Brother Enterprises Holding Co., Ltd.", "location": "Jiaxing, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4461430246", "site": "linkedin", "score": 50.0, "keywords": ["外贸销售"], "is_target": false, "date_posted": "2026-09-05", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 ①负责协助高级销售经理/销售经理对销售合同及销售文件资料进行管理，归类，整理，建档和保管工作 ②负责协助高级销售经理/销售经理报价单、合同、合同变更的编制，评审通过后及时转交客服部 ③负责协助高级销售经理/销售经理收集市场竞争信息及产业信息的收集"}, {"id": "62d532a4f0db54e7cc4e22a555f2c9d0", "title": "国际物流销售", "company": "EKY", "location": "Chengdu, Sichuan, China", "url": "https://www.linkedin.com/jobs/view/4461106176", "site": "linkedin", "score": 50.0, "keywords": ["跨境电商"], "is_target": false, "date_posted": "2026-09-04", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 国际物流销售 （零经验） 学历不限，经验不限，欢迎应届毕业生入职，公司有培训体系帮助新人快速上手。 向外贸公司，外贸工厂，跨境电商从业者推介公司有竞争力的国际物流服务。"}, {"id": "aadd95395836684fee465f52dcfd279f", "title": "海外销售（base全国，不限制，不坐班）", "company": "北京英博电气股份有限公司", "location": "Jiaxing, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4461812214", "site": "linkedin", "score": 50.0, "keywords": ["海外销售"], "is_target": false, "date_posted": "2026-09-06", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 岗位职责： 1、业务扩展:负责开发和维护(欧洲)市场，提高市场占有率； 2、客户关系:熟悉本地文化及生意模式，建立和维护与重要客户的商务关系，有效提升销售额和客户满意度； 3、市场分析:深度了解工商业储能、pcs、微网、集成等市场形势、敏锐识别市场缺口与新兴机遇，为公司战略决策提供坚实的数据支撑； 4、掌握市场及客户的需求，在所负责区域内主动开发及跟踪客户； 5、有效地管理海外分..."}, {"id": "a2b8979461a24dd82bb75ae03458d957", "title": "管培生-应届-成都-Terumo", "company": "泰尔茂", "location": "Chengdu, Sichuan, China", "url": "https://www.linkedin.com/jobs/view/4460920177", "site": "linkedin", "score": 12.0, "keywords": ["客户开发", "数据分析"], "is_target": false, "date_posted": "2026-09-02", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 职责描述： \"‌核心职责‌ ‌销售支持与业务拓展‌ 协助区域销售团队完成客户开发、产品推广及订单跟进。 参与市场策略落地，包括学术活动执行、经销商协作及KOL关系维护。 ‌临床与学术支持‌ 学习产品知识及临床应用，协助开展临床培训、不良事件跟进及学术资料整理。 收集竞品信息与客户反馈，支持区域学术项目策划。 ‌运营与数据分析‌ 协助销售数据统计、报表制作及CRM系统维护。 参与业..."}, {"id": "17dee991c6c1a1bf8a94d7db8ac5d478", "title": "有机硅海外营销工程师 (MJ002992)", "company": "新安传媒有限公司", "location": "Hangzhou, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4461423346", "site": "linkedin", "score": 10.0, "keywords": ["海外市场"], "is_target": false, "date_posted": "2026-09-05", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 岗位职责： 1、根据销售目标和市场情况，协助制定销售策略和计划，并对市场趋势和竞争对手进行分析评估；‌ 2、负责海外市场开拓和维护，与海外经销商建立合作关系，拓宽销售渠道，提高市场覆盖率； 3、建立和维护良好的客户关系，了解客户需求，提供专业咨询和支持，及时解决客户问题和投诉‌，定期拜访潜在客户，建立长期合作关系； 4、进行有机硅海外市场调研，收集市场信息，了解各行业对有机硅产品..."}, {"id": "32e38eeb44c671f83f4ada5b208d56da", "title": "Executive, Field Sales", "company": "DHL Global Forwarding", "location": "", "url": "https://www.linkedin.com/jobs/view/4464078610", "site": "linkedin", "score": 10.0, "keywords": ["英语四级"], "is_target": false, "date_posted": "", "first_seen": "2026-09-07", "is_expired": false, "description": "岗位职责：\n   \n\n  \n\n 1、此职位主要开发/维护区域内市场；\n   \n\n  \n\n 2、维护客户关系，处理客户投诉，完成指定销售指标；\n   \n\n  \n\n 3、通过团队合作，实现销售额和利润率；\n   \n\n  \n\n 4、配合公司的销售战略，实现一些特定产品的促销；\n   \n\n  \n\n 5、按照公司标准作业流程进行销售活动。\n   \n\n  \n\n 岗位要求：\n   \n\n  \n\n 1、本科及以上学..."}, {"id": "c2a393677c429ccb900b864708012ba0", "title": "On昂跑 店长 成都万象城店铺 ID216989", "company": "友邦科技", "location": "Chengdu, Sichuan, China", "url": "https://www.linkedin.com/jobs/view/4461422358", "site": "linkedin", "score": 10.0, "keywords": ["english fluent"], "is_target": false, "date_posted": "2026-09-05", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 In short On’s Direct\\-to\\-consumer (DTC) team, as a core part of business, condenses and presents the brand’s commitment and vision to movement. We will face consumers directly, interacting c..."}, {"id": "f6ae8c2007bbd33f2a3d52cd44eb0401", "title": "数据分析（供应链方向）(J10473)", "company": "Eoptolink Technology Inc., Ltd.", "location": "Chengdu, Sichuan, China", "url": "https://www.linkedin.com/jobs/view/4461807220", "site": "linkedin", "score": 4.0, "keywords": ["数据分析", "硕士"], "is_target": false, "date_posted": "2026-09-06", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 职责描述： 1、负责生产排程与协调，分析销售订单、市场需求预测以及企业产能，制定主生产计划，审核调度排程的合理性，监控生产进度，处理异常情况； 2、负责产能和资源的分析评估，根据设备、人力等资源的负荷情况，优化产能分配，避免生产瓶颈或资源浪费； 3、结合市场需求制定产能规划，指导扩产或者协调工厂/车间之间的资源； 4、负责物料需求/采购计划的制定与执行，根据主生产计划编制物料需求..."}, {"id": "042a43b8e59219f88c14f19c16cc1dc5", "title": "AP Analyst - Japan, Finance Operation, APAC Retail AP team", "company": "Amazon", "location": "Chengdu, Sichuan, China", "url": "https://www.linkedin.com/jobs/view/4463348502", "site": "linkedin", "score": 2.0, "keywords": ["data analysis"], "is_target": false, "date_posted": "2026-09-04", "first_seen": "2026-09-07", "is_expired": false, "description": "**Description**\n Amazon seeks a Retail AP Analyst to support Japan Retail AP invoice processing in Finance Operation Accounts Payable team.\n   \n\n  \n\n This position will corporate with the stakeholder ..."}, {"id": "08290aba6dea63f2fe97a66dc3ac2d93", "title": "Commodity Team Leader", "company": "Sourceo", "location": "C02, CN", "url": "https://cn.indeed.com/viewjob?jk=ce0027f81e001329", "site": "indeed", "score": 2.0, "keywords": ["data analysis"], "is_target": false, "date_posted": "2026-08-27", "first_seen": "2026-09-07", "is_expired": false, "description": "At **ABB**, we help industries run leaner and cleaner—and every person here makes that happen. You’ll be empowered to lead, supported to grow, and proud of the impact we create together. Join us and h..."}, {"id": "1f401598c38a6e1a14a97e18ce1b5f67", "title": "直播产品运营专员-杭州", "company": "Lazada", "location": "", "url": "https://www.linkedin.com/jobs/view/4464090265", "site": "linkedin", "score": 2.0, "keywords": ["数据分析"], "is_target": false, "date_posted": "", "first_seen": "2026-09-07", "is_expired": false, "description": "* 选品策略制定：基于直播场景特点（官播、达人直播、大促直播等），制定东南亚各国直播选品策略，包括品类结构、价格带分布、主推品与引流品的组合逻辑，并结合各国消费习惯和平台数据持续优化选品模型。\n* 货品运营机制设计：设计直播场景下的优惠机制（满减阶梯、直播专享券、Bundle组合、老客复购价等），围绕AOV提升和转化率优化目标，搭建可复用的促销框架，并与本地运营团队协同落地执行。\n* 产品运营与产..."}, {"id": "2ca94dbedb9415e787e06453b0fb8f9b", "title": "Seller Ops Specialist, Seller Operations", "company": "Amazon", "location": "Chengdu, Sichuan, China", "url": "https://www.linkedin.com/jobs/view/4461735006", "site": "linkedin", "score": 2.0, "keywords": ["data analysis"], "is_target": false, "date_posted": "2026-09-01", "first_seen": "2026-09-07", "is_expired": false, "description": "**Description**\n Amazon strives to be Earth's most customer\\-centric company where people can find and discover virtually anything they want to buy online. To serve the goal, Amazon has created one of..."}, {"id": "45b28bc1d4a71d5cedc26280eee00f25", "title": "品类运营（京东） (MJ001134)", "company": "百草味", "location": "Hangzhou, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4461105103", "site": "linkedin", "score": 2.0, "keywords": ["数据分析"], "is_target": false, "date_posted": "2026-09-04", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 岗位职责： 1、部门品类统筹：根据部门AOP目标统筹各类目拆解到单品的销售计划，同时周度、月度、季度复盘达成情况结合本品、竞品、行业趋势三方实时动态及时安排调整策略，以保证目标达成； 2、部门及本品类进销存管理：根据部门年度、月度销售目标、搭建销售预测模型，通过同/环比及实际可完成目标，规划备货量，同时对渠道销售做追踪，提升部门备货准确率，推动快捷化需求滚动； 3、品类结构优化：..."}, {"id": "657f3ca3d651eee01964de840d52df0d", "title": "Sales Enablement Specialist", "company": "埃克森美孚中国 ExxonMobil China", "location": "Chengdu, Sichuan, China", "url": "https://www.linkedin.com/jobs/view/4444415929", "site": "linkedin", "score": 2.0, "keywords": ["data analysis"], "is_target": false, "date_posted": "2026-09-04", "first_seen": "2026-09-07", "is_expired": false, "description": "**ExxonMobil in China**\n ExxonMobil has a long history in China dating back to 1892 when its predecessor Standard Oil began marketing kerosene to light the Mei Foo lamps at Chinese homes. Today, Exxon..."}, {"id": "6a0c93a11967db2c95cdc4b65987d7db", "title": "BD（成都）", "company": "MEDx", "location": "Chengdu, Sichuan, China", "url": "https://www.linkedin.com/jobs/view/4461437462", "site": "linkedin", "score": 2.0, "keywords": ["硕士"], "is_target": false, "date_posted": "2026-09-05", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 岗位职责： 1\\.为药企提供临床试验生物样本检测外包服务（分子、病理、流式、生物分析等平台），以及同创新药企达成伴随诊断试剂（CDx）开发合作； 2\\.挖掘销售机会，开发新客户（生物药、细胞治疗研发公司），根据目标制定行动计划； 3\\.对老客户关系进行维护，开拓新的需求，并处理订单。 任职要求： 1\\.生物、医学等相关专业硕士学历（或拥有足够生物学知识的其他专业学历）； 2\\.1..."}, {"id": "6b39de7fed73b93ab8002c2982c6c9a0", "title": "CD", "company": "Johnson & Johnson MedTech", "location": "Chengdu, Sichuan, China", "url": "https://www.linkedin.com/jobs/view/4304675913", "site": "linkedin", "score": 2.0, "keywords": ["硕士"], "is_target": false, "date_posted": "2026-09-01", "first_seen": "2026-09-07", "is_expired": false, "description": "At Johnson \\& Johnson, we believe health is everything. Our strength in healthcare innovation empowers us to build a world where complex diseases are prevented, treated, and cured, where treatments ar..."}, {"id": "808e728bc634b9dc3041c78323ac1a83", "title": "Operation Executive", "company": "Haleon", "location": "", "url": "https://www.linkedin.com/jobs/view/4443139384", "site": "linkedin", "score": 2.0, "keywords": ["数据分析"], "is_target": false, "date_posted": "2026-09-03", "first_seen": "2026-09-07", "is_expired": false, "description": "Welcome to Haleon. We’re a purpose\\-driven, world\\-class consumer company putting everyday health in the hands of millions. In just three years since our launch, we’ve grown, evolved and are now enter..."}, {"id": "808f09dc891e945f96ac1d0b14d3a691", "title": "电商运营（CBME）(J16471)", "company": "Beingmate", "location": "Hangzhou, Zhejiang, China", "url": "https://www.linkedin.com/jobs/view/4460960787", "site": "linkedin", "score": 2.0, "keywords": ["数据分析"], "is_target": false, "date_posted": "2026-09-02", "first_seen": "2026-09-07", "is_expired": false, "description": "工作职责：\n   \n\n  \n\n 1、负责公司电商平台店铺、直播、达播、短视频带货的运营规划，包括但不限于：经营策略，货组规划，流量规划，MCN合作等；\n   \n\n  \n\n 2、复盘经营数据，优化内容，合理规划广告投入预算，并对推广效果的数据进行分析和优化推广计划，提升转化效果及产能；\n   \n\n  \n\n 3、研究平台趋势和竞品打法表现，关注市场动态，及时、准确的研究分析各项数据，并提出相应对策。\n..."}, {"id": "eea7564fe5002e62af88e1f70a4e1cb4", "title": "【慧策校招】-销售管培生-高提点-To B-J15265", "company": "北京掌上先机网络科技有限公司", "location": "Chengdu, Sichuan, China", "url": "https://www.linkedin.com/jobs/view/4461423972", "site": "linkedin", "score": 2.0, "keywords": ["数据分析"], "is_target": false, "date_posted": "2026-09-05", "first_seen": "2026-09-07", "is_expired": false, "description": "该职位来源于猎聘 职责描述： 实施管培生岗位职责 【晋升发展】 高频晋升：每年4次晋升机会，打破层级壁垒，最快6个月晋升管理层 多元发展路径——纵向：可耕管理/专家赛道，实施管培生→实施城市经理/实施专家→实施区域经理 多元发展路径——横向：6\\+12个月定制化培养(不轮岗)，后期开放横向转岗通道，提供转岗产品经理/产品运营等相关岗位机会 行业前景广阔：电商、零售、供应链是数字化转型的核心领域，在..."}], "score_ref": 110.0, "desired_score": 60, "applied_ids": [], "discarded_ids": [], "maybe_ids": []};
+const LS_KEY = 'jss_applied';
+
+// Seed appliedSet from server-embedded applied_ids merged with localStorage
+let appliedSet = new Set(ARCHIVE_DATA.applied_ids || []);
+try {
+  const local = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+  local.forEach(id => appliedSet.add(id));
+} catch(e) {}
+
+// Seed discardedSet from server-embedded discarded_ids merged with localStorage
+let discardedSet = new Set(ARCHIVE_DATA.discarded_ids || []);
+try {
+  const localDisc = JSON.parse(localStorage.getItem('jss_discarded') || '[]');
+  localDisc.forEach(id => discardedSet.add(id));
+} catch(e) {}
+
+// Seed maybeSet from server-embedded maybe_ids merged with localStorage
+let maybeSet = new Set(ARCHIVE_DATA.maybe_ids || []);
+try {
+  const localMaybe = JSON.parse(localStorage.getItem('jss_maybe') || '[]');
+  localMaybe.forEach(id => maybeSet.add(id));
+} catch(e) {}
+
+function getApplied() {
+  return Array.from(appliedSet);
+}
+
+function saveApplied(arr) {
+  appliedSet = new Set(arr);
+  localStorage.setItem(LS_KEY, JSON.stringify(arr));
+}
+
+function saveDiscarded() {
+  localStorage.setItem('jss_discarded', JSON.stringify(Array.from(discardedSet)));
+}
+
+function saveMaybe() {
+  const arr = Array.from(maybeSet);
+  localStorage.setItem('jss_maybe', JSON.stringify(arr));
+  const pat  = localStorage.getItem('jss_gh_pat');
+  const user = localStorage.getItem('jss_gh_user');
+  const repo = localStorage.getItem('jss_gh_repo');
+  if (!pat || !user || !repo) return;
+  const MAYBE_FILE = 'maybe.json';
+  try {
+    const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${MAYBE_FILE}`;
+    let sha = null;
+    fetch(apiUrl,{headers:{Authorization:`Bearer ${pat}`}})
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d && d.sha) sha = d.sha;
+        const body = {message:'Update maybe.json', content:btoa(JSON.stringify(arr,null,2))};
+        if (sha) body.sha = sha;
+        return fetch(apiUrl,{method:'PUT',headers:{Authorization:`Bearer ${pat}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+      })
+      .catch(e => console.warn('Could not save maybe.json:', e));
+  } catch(e) { console.warn('Could not save maybe.json:', e); }
+}
+
+function scoreClass(score, ref) {
+  if (score >= 0.6 * ref) return 'score-high';
+  if (score >= 0.3 * ref) return 'score-mid';
+  return 'score-low';
+}
+
+function buildCard(job, isApplied) {
+  const ref     = ARCHIVE_DATA.score_ref || 1;
+  const desired = ARCHIVE_DATA.desired_score || 0;
+  const sc      = job.score;
+  const cls     = scoreClass(sc, ref);
+  const barPct  = Math.min(sc / ref * 100, 100).toFixed(1);
+  const kws     = (job.keywords || []).join(', ');
+  const dateLbl = job.date_posted ? job.date_posted.slice(0, 10) : (job.first_seen ? job.first_seen.slice(0, 10) : 'Date unknown');
+  const siteBadge  = job.site ? `<span class="badge badge-${job.site}">${job.site.toUpperCase()}</span>` : '';
+  const targetBadge = job.is_target ? `<span class="badge badge-target">Target company</span>` : '';
+  const desiredBadge = (desired > 0 && sc >= desired) ? `<span class="badge badge-desired">&#9733; Match</span>` : '';
+  const statusBadge = isApplied ? `<span class="badge badge-applied">&#10003; Applied</span>` : `<span class="badge badge-expired">Expired</span>`;
+  const actionBtn = isApplied
+    ? `<button class="undo-btn" onclick="undoApplied('${job.id}', this)">&#8617; Undo Applied</button>`
+    : '';
+  const cardCls = isApplied ? 'card applied-card' : (job.is_target ? 'card target-card' : 'card');
+
+  const descHtml = job.description ? `<div class="job-desc">${job.description}</div>` : '';
+  const fsDate   = job.first_seen ? job.first_seen.slice(0, 10) : '';
+  return `<div class="${cardCls}" data-jobid="${job.id}" data-firstseen="${fsDate}">
+  <div class="card-header">
+    <h3><a href="${job.url}" target="_blank" rel="noopener">${job.title}</a></h3>
+    <div class="badges">${desiredBadge}${targetBadge}${statusBadge}${siteBadge}</div>
+  </div>
+  <div class="card-meta">
+    <span>${job.company}</span>
+    <span>${job.location}</span>
+    <span>${dateLbl}</span>
+  </div>
+  <div class="score-row">
+    <span class="score-label">Fit:</span>
+    <span class="score-num ${cls}">${sc}</span>
+    <div class="score-bar"><div class="bar-fill ${cls}" style="width:${barPct}%"></div></div>
+  </div>
+  <div class="keywords">Keywords: ${kws || '—'}</div>
+  ${descHtml}
+  <div style="display:flex; gap:8px; align-items:center; margin-top:4px; flex-wrap:wrap;">
+    <a class="view-btn" href="${job.url}" target="_blank" rel="noopener">View posting</a>
+    ${actionBtn}
+  </div>
+</div>`;
+}
+
+function buildDiscardedCard(job) {
+  const ref      = ARCHIVE_DATA.score_ref || 1;
+  const desired  = ARCHIVE_DATA.desired_score || 0;
+  const sc       = job.score;
+  const cls      = scoreClass(sc, ref);
+  const barPct   = Math.min(sc / ref * 100, 100).toFixed(1);
+  const kws      = (job.keywords || []).join(', ');
+  const dateLbl  = job.date_posted ? job.date_posted.slice(0, 10) : (job.first_seen ? job.first_seen.slice(0, 10) : 'Date unknown');
+  const siteBadge    = job.site ? `<span class="badge badge-${job.site}">${job.site.toUpperCase()}</span>` : '';
+  const targetBadge  = job.is_target ? `<span class="badge badge-target">Target company</span>` : '';
+  const desiredBadge = (desired > 0 && sc >= desired) ? `<span class="badge badge-desired">&#9733; Match</span>` : '';
+  const statusBadge  = `<span class="badge badge-discarded">Discarded</span>`;
+  const cardCls      = job.is_target ? 'card target-card' : 'card';
+  const descHtml2    = job.description ? `<div class="job-desc">${job.description}</div>` : '';
+  const fsDate2      = job.first_seen ? job.first_seen.slice(0, 10) : '';
+  return `<div class="${cardCls}" data-jobid="${job.id}" data-firstseen="${fsDate2}">
+  <div class="card-header">
+    <h3><a href="${job.url}" target="_blank" rel="noopener">${job.title}</a></h3>
+    <div class="badges">${desiredBadge}${targetBadge}${statusBadge}${siteBadge}</div>
+  </div>
+  <div class="card-meta">
+    <span>${job.company}</span>
+    <span>${job.location}</span>
+    <span>${dateLbl}</span>
+  </div>
+  <div class="score-row">
+    <span class="score-label">Fit:</span>
+    <span class="score-num ${cls}">${sc}</span>
+    <div class="score-bar"><div class="bar-fill ${cls}" style="width:${barPct}%"></div></div>
+  </div>
+  <div class="keywords">Keywords: ${kws || '—'}</div>
+  ${descHtml2}
+  <div style="display:flex; gap:8px; align-items:center; margin-top:4px; flex-wrap:wrap;">
+    <a class="view-btn" href="${job.url}" target="_blank" rel="noopener">View posting</a>
+    <button class="restore-btn" onclick="restoreDiscarded('${job.id}', this)">&#8617; Restore</button>
+  </div>
+</div>`;
+}
+
+function buildMaybeCard(job) {
+  const ref      = ARCHIVE_DATA.score_ref || 1;
+  const desired  = ARCHIVE_DATA.desired_score || 0;
+  const sc       = job.score;
+  const cls      = scoreClass(sc, ref);
+  const barPct   = Math.min(sc / ref * 100, 100).toFixed(1);
+  const kws      = (job.keywords || []).join(', ');
+  const dateLbl  = job.date_posted ? job.date_posted.slice(0, 10) : (job.first_seen ? job.first_seen.slice(0, 10) : 'Date unknown');
+  const siteBadge    = job.site ? `<span class="badge badge-${job.site}">${job.site.toUpperCase()}</span>` : '';
+  const targetBadge  = job.is_target ? `<span class="badge badge-target">Target company</span>` : '';
+  const desiredBadge = (desired > 0 && sc >= desired) ? `<span class="badge badge-desired">&#9733; Match</span>` : '';
+  const statusBadge  = `<span class="badge" style="background:#fef3cd;color:#92400e;font-weight:700;">? Maybe</span>`;
+  const cardCls      = job.is_target ? 'card target-card' : 'card';
+  const descHtml3    = job.description ? `<div class="job-desc">${job.description}</div>` : '';
+  const fsDate3      = job.first_seen ? job.first_seen.slice(0, 10) : '';
+  return `<div class="${cardCls}" data-jobid="${job.id}" data-firstseen="${fsDate3}">
+  <div class="card-header">
+    <h3><a href="${job.url}" target="_blank" rel="noopener">${job.title}</a></h3>
+    <div class="badges">${desiredBadge}${targetBadge}${statusBadge}${siteBadge}</div>
+  </div>
+  <div class="card-meta">
+    <span>${job.company}</span>
+    <span>${job.location}</span>
+    <span>${dateLbl}</span>
+  </div>
+  <div class="score-row">
+    <span class="score-label">Fit:</span>
+    <span class="score-num ${cls}">${sc}</span>
+    <div class="score-bar"><div class="bar-fill ${cls}" style="width:${barPct}%"></div></div>
+  </div>
+  <div class="keywords">Keywords: ${kws || '—'}</div>
+  ${descHtml3}
+  <div style="display:flex; gap:8px; align-items:center; margin-top:4px; flex-wrap:wrap;">
+    <a class="view-btn" href="${job.url}" target="_blank" rel="noopener">View posting</a>
+    <button class="restore-btn" onclick="restoreMaybe('${job.id}', this)" style="background:#f39c12;">&#8617; Restore</button>
+  </div>
+</div>`;
+}
+
+function undoApplied(jid, btn) {
+  appliedSet.delete(jid);
+  saveApplied(Array.from(appliedSet));
+  // Remove card from applied section
+  const card = btn.closest('[data-jobid]');
+  if (card) card.remove();
+  // Move to expired section if job is expired and not discarded
+  const job = (ARCHIVE_DATA.jobs || []).find(j => j.id === jid);
+  if (job && job.is_expired && !discardedSet.has(jid)) {
+    const expiredGrid = document.getElementById('expiredGrid');
+    const emptyEl = document.getElementById('expiredEmpty');
+    if (emptyEl) emptyEl.remove();
+    expiredGrid.insertAdjacentHTML('beforeend', buildCard(job, false));
+  }
+  updateCounts();
+}
+
+function restoreDiscarded(jid, btn) {
+  discardedSet.delete(jid);
+  saveDiscarded();
+  // Remove card from discarded section
+  const card = btn.closest('[data-jobid]');
+  if (card) card.remove();
+  // Move to expired section
+  const job = (ARCHIVE_DATA.jobs || []).find(j => j.id === jid);
+  if (job && job.is_expired) {
+    const expiredGrid = document.getElementById('expiredGrid');
+    const emptyEl = document.getElementById('expiredEmpty');
+    if (emptyEl) emptyEl.remove();
+    expiredGrid.insertAdjacentHTML('beforeend', buildCard(job, false));
+  }
+  updateCounts();
+}
+
+function restoreMaybe(jid, btn) {
+  maybeSet.delete(jid);
+  saveMaybe();
+  // Remove card from maybe section
+  const card = btn.closest('[data-jobid]');
+  if (card) card.remove();
+  // Move to expired section
+  const job = (ARCHIVE_DATA.jobs || []).find(j => j.id === jid);
+  if (job && job.is_expired) {
+    const expiredGrid = document.getElementById('expiredGrid');
+    const emptyEl = document.getElementById('expiredEmpty');
+    if (emptyEl) emptyEl.remove();
+    expiredGrid.insertAdjacentHTML('beforeend', buildCard(job, false));
+  }
+  updateCounts();
+}
+
+function countVisible(gridEl) {
+  return Array.from(gridEl.querySelectorAll('[data-jobid]'))
+    .filter(c => c.style.display !== 'none').length;
+}
+
+function updateCounts() {
+  const appliedGrid    = document.getElementById('appliedGrid');
+  const maybeGrid      = document.getElementById('maybeGrid');
+  const expiredGrid    = document.getElementById('expiredGrid');
+  const discardedGrid  = document.getElementById('discardedGrid');
+  const appliedCards   = countVisible(appliedGrid);
+  const maybeCards     = countVisible(maybeGrid);
+  const expiredCards   = countVisible(expiredGrid);
+  const discardedCards = countVisible(discardedGrid);
+  document.getElementById('appliedSectionCount').textContent = appliedCards;
+  document.getElementById('maybeSectionCount').textContent = maybeCards;
+  document.getElementById('expiredSectionCount').textContent = expiredCards;
+  document.getElementById('discardedSectionCount').textContent = discardedCards;
+  if (appliedCards === 0 && !document.getElementById('appliedEmpty')) {
+    appliedGrid.innerHTML = '<div class="empty-state" id="appliedEmpty">No applied jobs yet. Mark jobs as Applied on the Live Job Board.</div>';
+  }
+  if (maybeCards === 0 && !document.getElementById('maybeEmpty')) {
+    maybeGrid.innerHTML = '<div class="empty-state" id="maybeEmpty">No maybe jobs yet. Mark jobs as Maybe on the Live Job Board.</div>';
+  }
+  if (expiredCards === 0 && !document.getElementById('expiredEmpty')) {
+    expiredGrid.innerHTML = '<div class="empty-state" id="expiredEmpty">No expired jobs yet.</div>';
+  }
+  if (discardedCards === 0 && !document.getElementById('discardedEmpty')) {
+    discardedGrid.innerHTML = '<div class="empty-state" id="discardedEmpty">No discarded jobs yet.</div>';
+  }
+}
+
+// ── Date filter ──────────────────────────────────────────────────
+let _filterFrom = null;  // Date | null
+let _filterTo   = null;  // Date | null
+
+function setPreset(days, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value   = '';
+  if (days === 'all') {
+    _filterFrom = null;
+    _filterTo   = null;
+  } else {
+    _filterTo   = new Date();
+    _filterFrom = new Date();
+    _filterFrom.setDate(_filterFrom.getDate() - parseInt(days));
+  }
+  applyDateFilter();
+}
+
+function setCustom() {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  const fv = document.getElementById('dateFrom').value;
+  const tv = document.getElementById('dateTo').value;
+  _filterFrom = fv ? new Date(fv) : null;
+  _filterTo   = tv ? new Date(tv) : null;
+  applyDateFilter();
+}
+
+function _inRange(dateStr) {
+  if (!_filterFrom && !_filterTo) return true;
+  if (!dateStr) return true;   // no date → always show
+  const d = new Date(dateStr);
+  if (_filterFrom && d < _filterFrom) return false;
+  if (_filterTo) {
+    const end = new Date(_filterTo);
+    end.setHours(23, 59, 59, 999);
+    if (d > end) return false;
+  }
+  return true;
+}
+
+function applyDateFilter() {
+  ['appliedGrid','maybeGrid','expiredGrid','discardedGrid'].forEach(id => {
+    document.getElementById(id).querySelectorAll('[data-jobid]').forEach(card => {
+      card.style.display = _inRange(card.getAttribute('data-firstseen')) ? '' : 'none';
+    });
+  });
+  updateCounts();
+}
+
+// ── Boot ─────────────────────────────────────────────────────────
+(function init() {
+  const jobs          = ARCHIVE_DATA.jobs || [];
+  const appliedGrid   = document.getElementById('appliedGrid');
+  const maybeGrid     = document.getElementById('maybeGrid');
+  const expiredGrid   = document.getElementById('expiredGrid');
+  const discardedGrid = document.getElementById('discardedGrid');
+
+  let appliedHtml   = '';
+  let maybeHtml     = '';
+  let expiredHtml   = '';
+  let discardedHtml = '';
+
+  for (const job of jobs) {
+    const isApp   = appliedSet.has(job.id);
+    const isMaybe = maybeSet.has(job.id);
+    const isDisc  = discardedSet.has(job.id);
+    if (isApp) {
+      appliedHtml += buildCard(job, true);
+    } else if (isMaybe) {
+      maybeHtml += buildMaybeCard(job);
+    } else if (isDisc) {
+      discardedHtml += buildDiscardedCard(job);
+    } else if (job.is_expired) {
+      expiredHtml += buildCard(job, false);
+    }
+  }
+
+  if (appliedHtml)   { appliedGrid.innerHTML   = appliedHtml;   }
+  if (maybeHtml)     { maybeGrid.innerHTML     = maybeHtml;     }
+  if (expiredHtml)   { expiredGrid.innerHTML   = expiredHtml;   }
+  if (discardedHtml) { discardedGrid.innerHTML = discardedHtml; }
+
+  updateCounts();
+})();
+</script>
+</body>
+</html>

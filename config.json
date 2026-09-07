@@ -1,0 +1,85 @@
+{
+  "site_title": "外贸 / 跨境电商求职看板",
+  "locations": ["Hangzhou, China", "Chengdu, China"],
+  "country_indeed": "China",
+  "search_queries": [
+    "外贸业务员",
+    "外贸专员",
+    "外贸业务助理",
+    "海外销售",
+    "国际销售",
+    "跨境电商运营",
+    "亚马逊运营",
+    "Shopify运营",
+    "海外市场",
+    "International Sales",
+    "Export Sales",
+    "International Business"
+  ],
+  "scored_keywords": [
+    {
+      "weight": 50,
+      "keywords": [
+        "外贸业务", "外贸销售", "外贸专员", "海外销售", "国际销售",
+        "跨境电商", "亚马逊运营", "shopify", "international sales",
+        "export sales", "international business", "overseas sales",
+        "cross-border e-commerce", "e-commerce specialist"
+      ]
+    },
+    {
+      "weight": 10,
+      "keywords": [
+        "英语流利", "英语六级", "英语四级", "商务英语", "英文邮件",
+        "海外市场", "国际业务", "客户开发", "展会", "谷歌开发信",
+        "alibaba", "独立站", "tiktok", "ebay", "wish",
+        "english fluent", "business english", "overseas market",
+        "customer development", "trade show", "google ads"
+      ]
+    },
+    {
+      "weight": 2,
+      "keywords": [
+        "数据分析", "内容运营", "社媒运营", "语言能力", "第二外语",
+        "硕士", "研究背景", "data analysis", "content operation",
+        "social media", "language skills", "second language", "master's degree"
+      ]
+    }
+  ],
+  "blacklist_title": [
+    "课程顾问",
+    "电话销售",
+    "保险",
+    "房产经纪",
+    "培训讲师",
+    "教育顾问",
+    "招生顾问"
+  ],
+  "blacklist_full": [
+    "教育培训机构",
+    "培训课程销售",
+    "保险产品销售",
+    "房地产销售",
+    "telemarketing",
+    "电话营销",
+    "外呼销售"
+  ],
+  "senior_patterns": [
+    "\\bsenior\\b",
+    "\\bsr\\b",
+    "\\blead\\b",
+    "\\bprincipal\\b",
+    "\\bdirector\\b",
+    "\\bvp\\b",
+    "\\bhead of\\b",
+    "\\bmanager\\b",
+    "高级",
+    "资深",
+    "总监",
+    "经理"
+  ],
+  "target_companies": [],
+  "results_per_query": 20,
+  "hours_old": 168,
+  "min_keywords": 1,
+  "desired_score": 60
+}
