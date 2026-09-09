@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手动录入职位 — Job Searcher</title>
+<style>
+  :root {
+    --primary: #1C7ED6;
+    --primary-deep: #0B5394;
+    --bg: #F4F9FC;
+    --surface: #FFFFFF;
+    --border: #D7E6EF;
+    --ink: #17242E;
+    --ink-soft: #4C5E6B;
+    --danger: #C94A3A;
+    --success: #2E9E5B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    padding: 32px 20px 80px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .sub { color: var(--ink-soft); font-size: 14px; margin: 0 0 24px; }
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 20px; margin-bottom: 20px;
+  }
+  .panel h2 { font-size: 15px; margin: 0 0 14px; color: var(--ink-soft); }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-soft); margin: 12px 0 4px; }
+  label:first-of-type { margin-top: 0; }
+  input, select, textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 5px; font-size: 14px; font-family: inherit; color: var(--ink);
+    background: var(--surface);
+  }
+  textarea { resize: vertical; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn {
+    padding: 9px 18px; border-radius: 5px; border: 1px solid transparent;
+    font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 16px;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-deep); }
+  .btn-secondary { background: transparent; border-color: var(--border); color: var(--ink); }
+  .btn-secondary:hover { background: #EAF3FA; }
+  .pending-item {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px;
+  }
+  .pending-item:last-child { border-bottom: none; }
+  .pending-main { font-size: 13.5px; }
+  .pending-main b { display: block; font-size: 14px; }
+  .pending-meta { color: var(--ink-soft); font-size: 12.5px; }
+  .del-btn {
+    border: none; background: none; color: var(--danger);
+    cursor: pointer; font-size: 13px; flex-shrink: 0;
+  }
+  .empty { color: var(--ink-soft); font-size: 13.5px; text-align: center; padding: 10px 0; }
+  .status-msg { font-size: 13px; margin-top: 10px; padding: 8px 10px; border-radius: 5px; display: none; }
+  .status-msg.show { display: block; }
+  .status-ok   { background: #e6f7ee; color: var(--success); }
+  .status-err  { background: #fdecea; color: var(--danger); }
+  .gh-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .gh-fields .full { grid-column: 1 / -1; }
+  .hint { font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
+  a.back { font-size: 13px; color: var(--primary); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="index.html">← 返回职位看板</a>
+  <h1>手动录入职位</h1>
+  <p class="sub">用于 BOSS直聘 / 智联招聘 / 猎聘 / 前程无忧 —— 这几个平台不做自动抓取，在这里手动粘贴职位信息，会走和自动抓取一样的打分/去重逻辑。</p>
+
+  <!-- ============ GitHub 连接（复用主看板 settings 的同一套凭据） ============ -->
+  <div class="panel">
+    <h2>GitHub 连接</h2>
+    <div class="gh-fields">
+      <div>
+        <label>用户名</label>
+        <input type="text" id="ghUser" placeholder="your-username">
+      </div>
+      <div>
+        <label>仓库名</label>
+        <input type="text" id="ghRepo" placeholder="AI-job-assistant-cn">
+      </div>
+      <div class="full">
+        <label>Personal Access Token</label>
+        <input type="password" id="ghPat" placeholder="ghp_...">
+      </div>
+    </div>
+    <p class="hint">和职位看板的 Settings 页共用同一套凭据（存在浏览器 localStorage 里），填过一次这里会自动带出来；没填过的话在这里填一次，两边都能用。</p>
+  </div>
+
+  <!-- ============ 录入表单 ============ -->
+  <div class="panel">
+    <h2>添加职位</h2>
+
+    <label>来源平台</label>
+    <select id="fSource">
+      <option value="boss">BOSS直聘</option>
+      <option value="zhilian">智联招聘</option>
+      <option value="liepin">猎聘</option>
+      <option value="51job">前程无忧</option>
+      <option value="manual">其他</option>
+    </select>
+
+    <label>职位名称 *</label>
+    <input type="text" id="fTitle" placeholder="外贸业务员">
+
+    <div class="row2">
+      <div>
+        <label>公司 *</label>
+        <input type="text" id="fCompany" placeholder="XX贸易有限公司">
+      </div>
+      <div>
+        <label>地点</label>
+        <input type="text" id="fLocation" placeholder="杭州">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div>
+        <label>薪资</label>
+        <input type="text" id="fSalary" placeholder="8-12K">
+      </div>
+      <div>
+        <label>发布日期</label>
+        <input type="date" id="fDate">
+      </div>
+    </div>
+
+    <label>职位链接 *</label>
+    <input type="url" id="fUrl" placeholder="https://www.zhipin.com/job_detail/...">
+
+    <label>职位描述（粘贴JD正文，用于打分匹配）</label>
+    <textarea id="fDesc" rows="5" placeholder="粘贴职位要求/职责全文..."></textarea>
+
+    <button class="btn btn-primary" id="addBtn">添加到本地列表</button>
+    <div class="status-msg" id="addMsg"></div>
+  </div>
+
+  <!-- ============ 待同步列表 ============ -->
+  <div class="panel">
+    <h2>待同步到 GitHub 的职位（<span id="pendingCount">0</span>）</h2>
+    <div id="pendingList">
+      <p class="empty" id="pendingEmpty">还没有添加任何职位</p>
+    </div>
+    <button class="btn btn-primary" id="syncBtn">保存到 GitHub</button>
+    <button class="btn btn-secondary" id="clearBtn">清空本地列表</button>
+    <div class="status-msg" id="syncMsg"></div>
+  </div>
+
+</div>
+
+<script>
+// ──────────────────────────────────────────────────────────
+// localStorage 键名，跟主看板 settings.html 保持一致，
+// 这样两边填一次PAT/用户名/仓库名即可互通
+// ──────────────────────────────────────────────────────────
+const LS_PAT  = 'jss_gh_pat';
+const LS_USER = 'jss_gh_user';
+const LS_REPO = 'jss_gh_repo';
+const LS_PENDING = 'jss_manual_pending';
+const MANUAL_FILE = 'manual_jobs.json';
+
+const $ = id => document.getElementById(id);
+
+// ---- 恢复GitHub连接信息 + 待同步列表 ----
+$('ghUser').value = localStorage.getItem(LS_USER) || '';
+$('ghRepo').value = localStorage.getItem(LS_REPO) || '';
+$('ghPat').value  = localStorage.getItem(LS_PAT)  || '';
+
+['ghUser','ghRepo','ghPat'].forEach(id => {
+  $(id).addEventListener('change', () => {
+    localStorage.setItem(id === 'ghUser' ? LS_USER : id === 'ghRepo' ? LS_REPO : LS_PAT, $(id).value.trim());
+  });
+});
+
+function loadPending() {
+  try { return JSON.parse(localStorage.getItem(LS_PENDING) || '[]'); }
+  catch (e) { return []; }
+}
+function savePending(arr) {
+  localStorage.setItem(LS_PENDING, JSON.stringify(arr));
+}
+
+// 简单hash当job_id，跟Python那边 _job_id() 逻辑保持一致（url优先，否则title+company）
+function simpleHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) { h = (h * 31 + str.charCodeAt(i)) | 0; }
+  return 'm' + Math.abs(h).toString(36);
+}
+
+function renderPending() {
+  const arr = loadPending();
+  $('pendingCount').textContent = arr.length;
+  const list = $('pendingList');
+  if (!arr.length) {
+    list.innerHTML = '<p class="empty" id="pendingEmpty">还没有添加任何职位</p>';
+    return;
+  }
+  list.innerHTML = arr.map((job, idx) => `
+    <div class="pending-item">
+      <div class="pending-main">
+        <b>${escapeHtml(job.title)} — ${escapeHtml(job.company)}</b>
+        <span class="pending-meta">${escapeHtml(job.source)} · ${escapeHtml(job.location || '未填地点')} · ${escapeHtml(job.salary || '未填薪资')}</span>
+      </div>
+      <button class="del-btn" data-idx="${idx}">删除</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const arr2 = loadPending();
+      arr2.splice(Number(btn.dataset.idx), 1);
+      savePending(arr2);
+      renderPending();
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function showMsg(el, text, ok) {
+  el.textContent = text;
+  el.className = 'status-msg show ' + (ok ? 'status-ok' : 'status-err');
+}
+
+// ---- 添加到本地待同步列表 ----
+$('addBtn').addEventListener('click', () => {
+  const title    = $('fTitle').value.trim();
+  const company  = $('fCompany').value.trim();
+  const url      = $('fUrl').value.trim();
+  if (!title || !company || !url) {
+    showMsg($('addMsg'), '职位名称、公司、链接是必填的', false);
+    return;
+  }
+  const job = {
+    id: simpleHash(url || (title + company)),
+    source: $('fSource').value,
+    title, company,
+    location: $('fLocation').value.trim(),
+    salary: $('fSalary').value.trim(),
+    date_posted: $('fDate').value,
+    job_url: url,
+    description: $('fDesc').value.trim(),
+    added_at: new Date().toISOString(),
+  };
+  const arr = loadPending();
+  // 同一个链接重复添加时，覆盖旧的而不是重复堆积
+  const existingIdx = arr.findIndex(j => j.id === job.id);
+  if (existingIdx >= 0) arr[existingIdx] = job; else arr.push(job);
+  savePending(arr);
+  renderPending();
+  showMsg($('addMsg'), '已添加到本地列表，记得点下面"保存到GitHub"才会真正同步', true);
+
+  // 清空表单，方便连续录入
+  ['fTitle','fCompany','fLocation','fSalary','fDate','fUrl','fDesc'].forEach(id => $(id).value = '');
+});
+
+// ---- UTF-8 安全的 base64 编码（中文内容用普通 btoa 会报错）----
+function utf8ToBase64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function base64ToUtf8(str) {
+  return decodeURIComponent(escape(atob(str)));
+}
+
+// ---- 保存到 GitHub：先拉现有 manual_jobs.json 合并，再 PUT 回去 ----
+$('syncBtn').addEventListener('click', async () => {
+  const pat  = localStorage.getItem(LS_PAT);
+  const user = localStorage.getItem(LS_USER);
+  const repo = localStorage.getItem(LS_REPO);
+  const pending = loadPending();
+
+  if (!pat || !user || !repo) {
+    showMsg($('syncMsg'), '请先填写用户名 / 仓库名 / PAT', false);
+    return;
+  }
+  if (!pending.length) {
+    showMsg($('syncMsg'), '待同步列表是空的，先添加职位', false);
+    return;
+  }
+
+  showMsg($('syncMsg'), '正在同步...', true);
+  const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${MANUAL_FILE}`;
+
+  try {
+    // 1) 拉取远端现有内容 + sha（用于合并，避免覆盖别的设备/别人加的记录）
+    let sha = null;
+    let remoteArr = [];
+    try {
+      const r = await fetch(apiUrl, { headers: { Authorization: `Bearer ${pat}` } });
+      if (r.ok) {
+        const d = await r.json();
+        sha = d.sha;
+        remoteArr = JSON.parse(base64ToUtf8(d.content));
+      }
+    } catch (e) { /* 文件不存在时走这里，remoteArr 保持空数组 */ }
+
+    // 2) 合并：按 id 去重，本地待同步的优先覆盖同id的远端记录
+    const merged = [...remoteArr];
+    pending.forEach(job => {
+      const idx = merged.findIndex(j => j.id === job.id);
+      if (idx >= 0) merged[idx] = job; else merged.push(job);
+    });
+
+    // 3) PUT 回GitHub
+    const body = {
+      message: `Add ${pending.length} manual job(s) via manual_entry.html`,
+      content: utf8ToBase64(JSON.stringify(merged, null, 2)),
+    };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${pat}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!putRes.ok) {
+      const errBody = await putRes.text();
+      throw new Error(`GitHub API ${putRes.status}: ${errBody.slice(0, 200)}`);
+    }
+
+    // 成功后清空本地待同步列表（已经进repo了）
+    savePending([]);
+    renderPending();
+    showMsg($('syncMsg'), `已同步 ${pending.length} 条职位到 manual_jobs.json，下次工作流跑起来时会自动并入打分流程`, true);
+
+  } catch (e) {
+    showMsg($('syncMsg'), '同步失败：' + e.message + '（检查PAT是否有repo权限、是否过期）', false);
+  }
+});
+
+$('clearBtn').addEventListener('click', () => {
+  if (confirm('清空本地待同步列表？已经同步过GitHub的记录不会受影响。')) {
+    savePending([]);
+    renderPending();
+  }
+});
+
+renderPending();
+</script>
+</body>
+</html>
